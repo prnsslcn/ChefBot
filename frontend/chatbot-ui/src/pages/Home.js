@@ -1,139 +1,15 @@
-import cheeseGratinImage from "../assets/치즈감자그라탕.jpg";
+import { AiChatBubble } from "../components/AiChatBubble";
+import { UserChatBubble } from "../components/UserChatBubble";
+import { UserInput } from "../components/UserInput";
 
 export default function Home() {
-  return (
-    <div className="bg-gray-300 p-10 min-h-screen flex flex-col">
-      <div className="bg-white w-full flex-grow p-6">
-        <div className="chat chat-start">
-          <div className="chat-bubble bg-yellow-400 text-xl">
-            어떤 요리를 만들고 싶으신가요?
-          </div>
-        </div>
-        <div className="chat chat-end my-4">
-          <div className="chat-bubble bg-orange-400 text-xl">
-            치즈, 감자를 이용한 요리를 알려줘
-          </div>
-        </div>
-        <div className="chat chat-start">
-          <div className="chat-bubble bg-yellow-400 text-xl">
-            치즈그라탕 어떤가요?
-          </div>
-        </div>
-        <div className="chat chat-start">
-          <div className="chat-bubble bg-yellow-400 text-xl">
-            📌 재료
-            <br />
-            감자: 3개, 200g 치즈, 생크림 1컵, 소금, 후추
-          </div>
-        </div>
-        <div className="chat chat-start">
-          <div className="chat-bubble bg-yellow-400 text-xl">
-            <img
-              src={cheeseGratinImage}
-              alt="치즈 그라탕"
-              className="w-full h-64 rounded-lg"
-            />
-          </div>
-        </div>
-        <div className="chat chat-start">
-          <div className="chat-bubble bg-yellow-400 text-xl text-sky-900">
-            치즈그라탕을 만들고 싶다면 "시작"버튼을 눌러주세요
-          </div>
-        </div>
-        <div className="flex justify-center items-center my-6">
-          <button className="btn bg-sky-400 w-1/3 text-2xl p-6">시작</button>
-        </div>
-        {/* 여기부터 */}
-        <div>
-          <div className="chat chat-start">
-            <div className="chat-bubble bg-yellow-400 text-xl">
-              Step 1: 감자를 얇게 잘라주세요
-              <br />다 되었다면 "다음"버튼을 눌러주세요
-            </div>
-          </div>
-          <div className="flex justify-center items-center my-6">
-            <button className="btn bg-emerald-400 text-emerald-900 w-1/3 text-2xl p-6">
-              다음
-            </button>
-          </div>
-          <div className="chat chat-start">
-            <div className="chat-bubble bg-yellow-400 text-xl">
-              🎉 완료! 200°C 오븐에서 30분간 구우면 맛있는 치즈 감자 그라탕이
-              완성됩니다! 😋
-            </div>
-          </div>
-          <div className="chat chat-start">
-            <div className="chat-bubble bg-yellow-400 text-xl">
-              다른 레시피를 시도해보고 싶다면 "다시 시작" 버튼을 눌러주세요!
-            </div>
-          </div>
-          <div className="flex justify-center items-center my-6">
-            <button className="btn bg-red-400 text-red-900 w-1/3 text-2xl p-6">
-              다시 시작
-            </button>
-          </div>
-        </div>
-        <div>
-          <ul className="steps steps-vertical">
-            <li className="step step-primary text-xl">
-              감자를 얇게 잘라주세요
-            </li>
-            <li className="step">
-              <div className="flex justify-center items-center my-6">
-                <button className="btn bg-emerald-400 text-emerald-900 text-xl p-6">
-                  다음
-                </button>
-              </div>
-            </li>
-          </ul>
-          <div>
-            <ul className="steps steps-vertical">
-              <li className="step step-primary text-xl">
-                감자를 얇게 잘라주세요
-              </li>
-              <li className="step step-primary text-xl">
-                🎉 완료! 200°C 오븐에서 30분간 구우면 맛있는 치즈 감자 그라탕이
-                완성됩니다! 😋
-                <br /> 다른 레시피를 시도해보고 싶다면 "다시 시작" 버튼을
-                눌러주세요!
-              </li>
-              <li className="step">
-                <div className="flex justify-center items-center my-6">
-                  <button className="btn bg-red-400 text-red-900 text-xl p-6">
-                    다시 시작
-                  </button>
-                </div>
-              </li>
-            </ul>
-          </div>
-        </div>
-      </div>
 
-      <div className="bg-white p-6 relative">
-        <input
-          type="text"
-          placeholder="만들고 싶은 요리를 입력해주세요"
-          className="input input-xl w-full pr-28 focus:outline-none"
-        />
-        <button className="btn absolute right-9 top-1/2 transform -translate-y-1/2">
-          전송
-          <svg
-            width="24"
-            height="24"
-            viewBox="0 0 48 48"
-            fill="none"
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            <path
-              d="M44 4L22 26M44 4L30 44L22 26M44 4L4 18L22 26"
-              stroke="#1E1E1E"
-              strokeWidth="4"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-          </svg>
-        </button>
-      </div>
-    </div>
-  );
+    return (
+        <div className="bg-gray-300 p-10 min-h-screen flex flex-col">
+            <AiChatBubble/>
+            <UserChatBubble/>
+            <UserInput/>
+        </div>
+    );
 }
+
