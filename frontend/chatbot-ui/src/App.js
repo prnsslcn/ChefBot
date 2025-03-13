@@ -1,11 +1,12 @@
+import { ChatProvider } from "./context/ChatContext";
 import Home from "./pages/Home";
 
 function App() {
 
   return (
-    <div>
+    <ChatProvider>
       <Home/>
-    </div>
+    </ChatProvider>
   );
 }
 
