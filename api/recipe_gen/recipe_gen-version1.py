@@ -5,6 +5,7 @@ import openai
 from langchain_openai import OpenAI
 import faiss
 
+
 ## 1. api 키등록
 
 # os - 파일경로 조작 , __file__ 현재 실행중인 Python 파일의 전체경로를 나타냄
