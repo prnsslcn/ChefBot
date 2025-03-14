@@ -11,20 +11,8 @@ from langchain.prompts.example_selector import MaxMarginalRelevanceExampleSelect
 # Flask 앱 초기화
 app = Flask(__name__)
 
-# OpenAI API 키 설정
-env_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), ".env")
-
-def get_api_key(env_file):
-    if os.path.exists(env_file):
-        with open(env_file, "r", encoding="utf-8") as file:
-            for line in file:
-                line = line.strip()
-                if line.startswith("OPENAI_API_KEY="):
-                    return line.split("=", 1)[1].strip().strip("'").strip('"')
-    print("API KEY를 찾을 수 없음")
-    return None
-
-API_KEY = get_api_key(env_path)
+# ✅ OpenAI API 키 (직접 입력)
+API_KEY = ""
 os.environ["OPENAI_API_KEY"] = API_KEY
 client = OpenAI(api_key=API_KEY)
 
