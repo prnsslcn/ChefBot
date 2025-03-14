@@ -1,12 +1,12 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import { useChat } from '../context/ChatContext';
 
 const AllChatBubble = () => {
   const { allMessages } = useChat();
+  const [showSteps, setShowSteps] = useState(false); 
 
-  const renderedMessages = useMemo(() => 
+  const renderedMessages = useMemo(() =>
     allMessages.map((message, index) => {
-    console.log(message)
       if (typeof message === "string") {
         if (message === "어떤 요리를 만들고 싶으세요?") {
           return (
@@ -37,22 +37,33 @@ const AllChatBubble = () => {
                 <li key={idx}>{ingredient}</li>
               ))}
             </ul>
-            <div>Steps:</div>
-            <ol>
-              {message.recipe.steps.map((step, idx) => (
-                <li key={idx}>{step}</li>
-              ))}
-            </ol>
-            {message.image_url && (
-              <div>
-                <img src={message.image_url} alt="Recipe" className="w-32 h-32" />
-              </div>
+            <div className="flex justify-center items-center my-6">
+                <button 
+                className="btn bg-sky-400 w-1/3 text-2xl p-6"
+                onClick={()=>setShowSteps(true)}
+                >시작</button>
+            </div>
+
+            {showSteps && (
+              <>
+                <div>Steps:</div>
+                <ol>
+                  {message.recipe.steps.map((step, idx) => (
+                    <li key={idx}>{step}</li>
+                  ))}
+                </ol>
+                {message.image_url && (
+                  <div>
+                    <img src={message.image_url} alt="Recipe" className="w-32 h-32" />
+                  </div>
+                )}
+              </>
             )}
           </div>
         </div>
       );
     }),
-    [allMessages]
+    [allMessages, showSteps] 
   );
 
   return (

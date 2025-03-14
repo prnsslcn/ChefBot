@@ -3,7 +3,7 @@ import { useChat } from "../context/ChatContext";
 
 export const UserInput = () => {
   const [userInput, setUserInput] = useState('');
-  const { setMessages, setCallResponse, setAllMessages, allMessages, setAiResponse,aiResponse } = useChat(); 
+  const { setMessages, setCallResponse, setAllMessages } = useChat(); 
 
   const handleInputChange = (e) => {
     setUserInput(e.target.value);
