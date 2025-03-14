@@ -6,7 +6,6 @@ import axios from "axios";
 export const AiChatValidate = () => {
   const { callResponse, setAiResponse, setCallResponse, setAllMessages} = useChat();
 
-
   useEffect(() => {
     if (callResponse) {
       const fetchAiResponse = async () => {
