@@ -14,7 +14,6 @@ export const UserInput = () => {
       setMessages((prevMessages) => [...prevMessages, userInput]);
       setAllMessages((prevMessages) => [...prevMessages, { type: "user", text: userInput }])
       setCallResponse(true);
-      console.log(allMessages)
       setUserInput(''); 
     }
   };
@@ -27,20 +26,35 @@ export const UserInput = () => {
   };
   
   return (
-    <div className="bg-white p-4 ">
+    <div className="bg-white p-6 relative">
       <input
         type="text"
         placeholder="만들고 싶은 요리를 입력해주세요"
-        className="input input-xl w-full focus:outline-none"
+        className="input input-xl w-full pr-28 focus:outline-none"
         value={userInput}
-        onChange={handleInputChange}
-        onKeyDown={handleKeyDown}
+        onChange={handleInputChange}  
+        onKeyDown={handleKeyDown}  
       />
-      <button
-        className="btn btn-outline mt-4"
-        onClick={handleSubmit}
+      <button 
+      className="btn absolute right-9 top-1/2 transform -translate-y-1/2"
+      onClick={handleSubmit}
       >
-        보내기
+        전송
+        <svg
+          width="24"
+          height="24"
+          viewBox="0 0 48 48"
+          fill="none"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path
+            d="M44 4L22 26M44 4L30 44L22 26M44 4L4 18L22 26"
+            stroke="#1E1E1E"
+            strokeWidth="4"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
+        </svg>
       </button>
     </div>
   );
