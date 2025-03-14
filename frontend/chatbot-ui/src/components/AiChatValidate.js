@@ -1,6 +1,6 @@
 import { useEffect, useMemo } from "react";
 import { useChat } from "../context/ChatContext";
-import { postQuery } from "../api/getQuery";
+import { postQuery } from "../api/getQuery"; // 
 
 export const AiChatValidate = () => {
   const { aiResponse, callResponse, messages, setAiResponse, setCallResponse, setAllMessages, allMessages } = useChat();
