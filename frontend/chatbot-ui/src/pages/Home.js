@@ -13,3 +13,25 @@ export default function Home() {
     );
 }
 
+/*
+시작 버튼
+        <div className="flex justify-center items-center my-6">
+            <button className="btn bg-sky-400 w-1/3 text-2xl p-6">시작</button>
+        </div>
+
+다음 버튼
+          <div className="flex justify-center items-center my-6">
+            <button className="btn bg-emerald-400 text-emerald-900 w-1/3 text-2xl p-6">
+              다음
+            </button>
+          </div>
+          <div className="chat chat-start">
+
+다시 시작
+          <div className="flex justify-center items-center my-6">
+            <button className="btn bg-red-400 text-red-900 w-1/3 text-2xl p-6">
+              다시 시작
+            </button>
+          </div>
+*/
+
