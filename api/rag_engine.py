@@ -60,4 +60,7 @@ if __name__ == "__main__":
     for idx, recipe in enumerate(results):
         print(f"\n{idx+1}. {recipe['name']}")
         print(f"   재료: {recipe['ingredients']}")
-        print(f"   조리법: {recipe['recipe'][:2]}...")  # 조리법은 2단계까지만 출력
+        print(f"   조리법: {recipe['recipe'][:2]}...")  # 조리법은 2단계까지만 출력 (앞부분만)
+
+
+
