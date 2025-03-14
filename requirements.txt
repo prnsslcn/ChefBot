@@ -3,3 +3,7 @@ flask_cors
 openai
 numpy
 faiss-cpu
+dotenv
+langchain
+langchain_openai
+langchain_community
