@@ -1,6 +1,6 @@
 from flask import Blueprint, jsonify, request
 # from .recipe_gen import genarate_recipe # 임의 설정 함수명 통일해야함
-from .image_gen import generate_image as generate_image_ai# 임의 설정 함수명 통일해야함
+from .image_gen import generate_image as generate_image_from_ai# 임의 설정 함수명 통일해야함
 # from .rag_engine import search_similar_recipes # 임의 설정 함수명 통일해야함
 
 routes = Blueprint('routes', __name__)
@@ -24,7 +24,7 @@ def generate_recipe():
 def generate_image():
     data = request.get_json()
     prompt = data.get("prompt", "")
-    return generate_image_ai(prompt)
+    return generate_image_from_ai(prompt)
     # return jsonify({"message": generate_image})
 
 
