@@ -1,3 +1,4 @@
+import axios from "axios";
 import { customAxios } from "./axiosCustom"
 
 export const postQuery = async ( user_input ) => {
@@ -12,7 +13,7 @@ export const postQuery = async ( user_input ) => {
 // json-server 테스트용
 export const getRecipes = async () => {
     try {
-        const response = await customAxios.get('/recipes')
+        const response = await axios.get('http://localhost:5000/0')
         return response.data
     } catch (error) {
         throw error
