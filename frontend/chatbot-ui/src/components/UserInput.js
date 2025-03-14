@@ -3,7 +3,7 @@ import { useChat } from "../context/ChatContext";
 
 export const UserInput = () => {
   const [userInput, setUserInput] = useState('');
-  const { setMessages, setCallResponse } = useChat(); 
+  const { setMessages, setCallResponse, setAllMessages, allMessages } = useChat(); 
 
   const handleInputChange = (e) => {
     setUserInput(e.target.value);
@@ -12,7 +12,9 @@ export const UserInput = () => {
   const handleSubmit = async () => {
     if (userInput.trim() !== '') {
       setMessages((prevMessages) => [...prevMessages, userInput]);
+      setAllMessages((prevMessages) => [...prevMessages, { type: "user", text: userInput }])
       setCallResponse(true);
+      console.log(allMessages)
       setUserInput(''); 
     }
   };
@@ -23,7 +25,7 @@ export const UserInput = () => {
       handleSubmit();
     }
   };
-  // fixed bottom-0 left-0 w-full z-10
+  
   return (
     <div className="bg-white p-4 ">
       <input

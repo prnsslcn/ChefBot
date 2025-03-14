@@ -6,9 +6,13 @@ export const ChatProvider = ({ children }) => {
     const [messages, setMessages] = useState([]);
     const [aiResponse, setAiResponse] = useState(['어떤 요리를 만들고 싶으세요?']);
     const [callResponse, setCallResponse] = useState(false);
+    const [allMessages, setAllMessages] = useState([{
+        type: "ai", 
+        text: "어떤 요리를 만들고 싶으세요?'"
+    }])
 
     return (
-        <ChatContext.Provider value={{ messages, setMessages, aiResponse, setAiResponse, callResponse, setCallResponse }}>
+        <ChatContext.Provider value={{ messages, setMessages, aiResponse, setAiResponse, callResponse, setCallResponse, allMessages, setAllMessages }}>
             {children}
         </ChatContext.Provider>
     );
