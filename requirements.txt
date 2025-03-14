@@ -3,3 +3,4 @@ flask_cors
 openai
 numpy
 faiss-cpu
+dotenv
