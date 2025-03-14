@@ -36,7 +36,7 @@ def get_embedding(user_input):
     )
     return np.array(response.data[0].embedding).reshape(1, -1)  # FAISS 검색을 위해 2D 배열 변환
 
-# 유사 레시피 검색 함수 (FAISS에서 바로 가져오기)
+# 유사 레시피 검색 함수 (FAISS에서 바로 가져오기) (최종)
 def search_similar_recipe(user_input, top_n=3):
     # 사용자 입력 임베딩
     user_embedding = get_embedding(user_input)
@@ -46,11 +46,10 @@ def search_similar_recipe(user_input, top_n=3):
     similar_recipes = []
     for i in range(top_n):
         recipe_idx = indices[0][i]  # 검색된 레시피 인덱스
-        similar_recipes.append(all_recipes[recipe_idx])  # 저장된 FAISS에서 직접 가져오기
-
+        similar_recipes.append(all_recipes[recipe_idx])  # 저장된 FAISS에서 직접 가져오기 
     return similar_recipes
 
-# 테스트용
+# 테스트용 
 if __name__ == "__main__":
     # 입력 받기
     user_input = input("재료나 메뉴를 입력하세요: ")
