@@ -2,7 +2,7 @@ import { useEffect, useMemo } from "react";
 import { useChat } from "../context/ChatContext";
 import { postQuery } from "../api/getQuery";
 
-export const AiChatBubble = () => {
+export const AiChatValidate = () => {
   const { aiResponse, callResponse, messages, setAiResponse, setCallResponse, setAllMessages, allMessages } = useChat();
 
   useEffect(() => {
