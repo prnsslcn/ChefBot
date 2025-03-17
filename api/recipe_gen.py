@@ -127,16 +127,55 @@ def search_similar_recipe(user_input, top_n=3):
     return similar_recipes
 
 # GPT 프롬프트 생성
+# def generate_prompt(user_input):
+#     selected_examples = example_selector.select_examples({"input": user_input})
+#     example_text = "\n".join([f"입력: {ex['input']}\n출력: {ex['output']}" for ex in selected_examples])
+
+#     # 유사 레시피 검색 결과 추가
+#     similar_recipes = search_similar_recipe(user_input, top_n=3)
+#     recipe_text = "\n\n".join([f"레시피: {recipe['name']}\n재료: {', '.join(recipe['ingredients'])}" for recipe in similar_recipes])
+
+#     prompt = f"예제:\n{example_text}\n\n추천 레시피:\n{recipe_text}\n\n질문: {user_input}\n답변:"
+#     return prompt
+
 def generate_prompt(user_input):
     selected_examples = example_selector.select_examples({"input": user_input})
     example_text = "\n".join([f"입력: {ex['input']}\n출력: {ex['output']}" for ex in selected_examples])
-
-    # 유사 레시피 검색 결과 추가
     similar_recipes = search_similar_recipe(user_input, top_n=3)
-    recipe_text = "\n\n".join([f"레시피: {recipe['name']}\n재료: {', '.join(recipe['ingredients'])}" for recipe in similar_recipes])
+    recipe_text = "\n\n".join([f"레시피 이름: {r['name']}\n재료: {r['ingredients']}" for r in similar_recipes])
+    prompt = f"""
+다음 사용자 입력과 유사한 레시피 데이터를 참고하여 요리를 추천해주세요.
+아래 JSON 형식으로만 응답해주세요. 설명은 하지 마세요:
+{{
+  "title": "요리 이름",
+  "ingredients": ["재료1", "재료2", "재료3"],
+  "steps": ["1단계 설명", "2단계 설명", "3단계 설명"]
+}}
 
-    prompt = f"예제:\n{example_text}\n\n추천 레시피:\n{recipe_text}\n\n질문: {user_input}\n답변:"
+참고 레시피:
+{recipe_text}
+
+사용자 입력: {user_input}
+"""
     return prompt
+
+def get_recipe_from_gpt(prompt):
+    response = llm.invoke([{"role": "user", "content": prompt}])
+    content = response.content.strip()
+    json_start = content.find('{')
+    json_end = content.rfind('}')
+    try:
+        if json_start != -1 and json_end != -1:
+            json_str = content[json_start:json_end+1]
+            return json.loads(json_str)
+        else:
+            raise ValueError("No valid JSON structure")
+    except Exception:
+        return {
+            "title": "AI Generated Recipe",
+            "ingredients": [],
+            "steps": content.split('\n')
+        }
 
 # API 엔드포인트 생성
 @app.route("/generate-recipe", methods=["POST"])
