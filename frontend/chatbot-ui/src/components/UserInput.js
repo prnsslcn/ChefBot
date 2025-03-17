@@ -1,30 +1,30 @@
-import React, { useState } from 'react';
-import { useChat } from "../context/ChatContext"; 
+import React, { useState } from "react";
+import { useChat } from "../context/ChatContext";
 
 export const UserInput = () => {
-  const [userInput, setUserInput] = useState('');
-  const { setMessages, setCallResponse, setAllMessages } = useChat(); 
+  const [userInput, setUserInput] = useState("");
+  const { setMessages, setCallResponse, setAllMessages } = useChat();
 
   const handleInputChange = (e) => {
     setUserInput(e.target.value);
   };
 
   const handleSubmit = async () => {
-    if (userInput.trim() !== '') {
+    if (userInput.trim() !== "") {
       setMessages((prevMessages) => [...prevMessages, userInput]);
       setAllMessages((prevMessages) => [...prevMessages, userInput]);
       setCallResponse(true);
-      setUserInput('');
+      setUserInput("");
     }
   };
 
   const handleKeyDown = (e) => {
-    if (e.key === 'Enter') {
+    if (e.key === "Enter") {
       e.preventDefault();
       handleSubmit();
     }
   };
-  
+
   return (
     <div className="bg-white p-6 relative">
       <input
@@ -32,12 +32,12 @@ export const UserInput = () => {
         placeholder="만들고 싶은 요리를 입력해주세요"
         className="input input-xl w-full pr-28 focus:outline-none"
         value={userInput}
-        onChange={handleInputChange}  
-        onKeyDown={handleKeyDown}  
+        onChange={handleInputChange}
+        onKeyUp={handleKeyDown}
       />
-      <button 
-      className="btn absolute right-9 top-1/2 transform -translate-y-1/2"
-      onClick={handleSubmit}
+      <button
+        className="btn absolute right-9 top-1/2 transform -translate-y-1/2"
+        onClick={handleSubmit}
       >
         전송
         <svg
