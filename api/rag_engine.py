@@ -3,10 +3,12 @@ import faiss
 from openai import OpenAI
 import os
 import json
+from dotenv import load_dotenv
 # 현재 FAISS 인덱스와 레시피 데이터를 활용하여 유사 레시피 검색 후 반환까지 테스트 진행
 
 # OpenAI API 설정
-API_KEY = ""  # OpenAI API 키 입력 (깃헙 반영을 위해 공백 처리)
+load_dotenv(verbose=True)
+API_KEY = os.getenv("OPENAI_API_KEY")
 client = OpenAI(api_key=API_KEY)
 
 # 현재 스크립트(파일)가 있는 디렉토리를 기준으로 FAISS 인덱스 경로 설정
