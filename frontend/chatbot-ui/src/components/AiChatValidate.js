@@ -18,7 +18,7 @@ export const AiChatValidate = () => {
       const fetchAiResponse = async () => {
         try {
           setIsAiResponding(true);
-          const response = await axios.get("http://localhost:5001/1");
+          const response = await axios.get("http://localhost:5001/2");
 
           // ai 레시피 제안
           const newMessages = [
