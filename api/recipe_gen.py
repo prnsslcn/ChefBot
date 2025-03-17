@@ -2,7 +2,6 @@ import os
 import json
 import numpy as np
 import faiss
-import openai
 from flask import Flask, request, jsonify
 from openai import OpenAI
 from langchain_openai import OpenAIEmbeddings, ChatOpenAI
@@ -12,6 +11,7 @@ from dotenv import load_dotenv
 
 # Flask 앱 초기화
 app = Flask(__name__)
+
 
 # OpenAI API 키
 load_dotenv()
@@ -86,65 +86,9 @@ samples = [
     {
         "input": "고흐의 별이 빛나는 밤",
         "output": "고흐의 별이 빛나는 밤을 닮은 디저트 만들기\n1. 블루베리와 레몬 커드를 활용한 파이를 준비합니다.\n2. 푸른색과 노란색의 아이싱을 이용해 밤하늘을 표현합니다.\n3. 초콜릿 별 장식을 더해 예술적인 디저트를 완성합니다."
-    },
-     {
-        "input": "닭가슴살, 브로콜리, 계란, 올리브오일",
-        "output": "고단백 닭가슴살 브로콜리 볶음 만드는 방법\n"
-                  "1. 닭가슴살을 한 입 크기로 썬 후 올리브오일에 가볍게 볶습니다.\n"
-                  "2. 브로콜리는 데친 후 닭가슴살과 함께 볶아줍니다.\n"
-                  "3. 계란을 풀어 스크램블 형태로 만든 후 같이 섞어줍니다.\n"
-                  "4. 소금과 후추로 간을 맞추고 완성합니다."
-    },
-    {
-        "input": "연어, 아보카도, 양파, 간장",
-        "output": "연어 아보카도 포케볼 만드는 방법\n"
-                  "1. 연어를 신선한 사시미 크기로 자릅니다.\n"
-                  "2. 양파는 얇게 채 썰어 찬물에 담가 매운맛을 제거합니다.\n"
-                  "3. 아보카도는 깍둑썰기 해서 연어와 함께 섞습니다.\n"
-                  "4. 간장, 참기름, 약간의 레몬즙을 뿌려 잘 섞어줍니다.\n"
-                  "5. 밥 위에 올려 포케볼 형태로 완성합니다."
-    },
-    {
-        "input": "소고기, 감자, 당근, 양파",
-        "output": "일본식 소고기 감자조림(니쿠자가) 만드는 방법\n"
-                  "1. 소고기를 기름을 두른 팬에 넣고 볶아줍니다.\n"
-                  "2. 감자, 당근, 양파를 큼직하게 썰어 소고기와 함께 볶습니다.\n"
-                  "3. 물을 넣고 간장, 설탕, 맛술을 추가하여 조립니다.\n"
-                  "4. 감자가 부드러워질 때까지 약한 불에서 졸여 완성합니다."
-    },
-    {
-        "input": "두부, 간장, 참기름, 파, 마늘",
-        "output": "두부 간장구이 만드는 방법\n"
-                  "1. 두부를 먹기 좋은 크기로 자르고 키친타월로 물기를 제거합니다.\n"
-                  "2. 기름을 두른 팬에 두부를 노릇하게 구워줍니다.\n"
-                  "3. 간장, 다진 마늘, 참기름을 섞어 양념장을 만듭니다.\n"
-                  "4. 구운 두부 위에 양념장을 끼얹고 파를 올려 마무리합니다."
-    },
-    {
-        "input": "계란, 우유, 치즈, 버터",
-        "output": "프렌치 스타일 스크램블 에그 만드는 방법\n"
-                  "1. 계란을 볼에 풀고 우유와 소금을 약간 넣어 섞습니다.\n"
-                  "2. 약한 불에서 버터를 녹이고 계란을 넣습니다.\n"
-                  "3. 부드럽게 저어가며 익히다가 마지막에 치즈를 추가합니다.\n"
-                  "4. 촉촉하고 크리미한 스크램블 에그를 완성합니다."
-    },
-    {
-        "input": "밥, 김, 참기름, 단무지, 참치",
-        "output": "참치 마요 김밥 만드는 방법\n"
-                  "1. 참치캔의 기름을 제거하고 마요네즈와 함께 섞어줍니다.\n"
-                  "2. 김 위에 밥을 얇게 펴고 참기름을 발라줍니다.\n"
-                  "3. 참치 마요, 단무지를 올리고 김밥처럼 말아줍니다.\n"
-                  "4. 먹기 좋은 크기로 썰어 완성합니다."
-    },
-    {
-        "input": "파스타, 마늘, 올리브오일, 페퍼론치노",
-        "output": "알리오 올리오 파스타 만드는 방법\n"
-                  "1. 파스타를 소금물에 삶아 준비합니다.\n"
-                  "2. 팬에 올리브오일을 두르고 얇게 썬 마늘을 볶습니다.\n"
-                  "3. 페퍼론치노를 넣고 향을 낸 후 삶은 파스타를 넣어 볶습니다.\n"
-                  "4. 면수(파스타 삶은 물)를 약간 추가해 유화시킨 후 완성합니다."
     }
 ]
+
 
 
 # Few-Shot Learning을 위한 FAISS 메모리 벡터 저장소 생성
@@ -172,31 +116,8 @@ def get_embedding(user_input):
     )
     return np.array(response.data[0].embedding).reshape(1, -1)  # FAISS 검색을 위해 2D 배열 변환
 
-# 재료 추출 함수
-client = openai.Client()
-def extract_ingredients(text):
-    prompt = f"""
-    사용자의 입력에서 요리에 필요한 식재료만 추출해주세요. 
-    문장이 아니라 "재료1, 재료2, 재료3" 형식으로만 출력하세요.
-    
-    예제 입력: "닭가슴살과 브로콜리를 사용해서 건강한 식사를 만들고 싶어요."
-    예제 출력: "닭가슴살, 브로콜리"
-
-    입력: "{text}"
-    출력:
-    """
-
-    response = client.chat.completions.create(
-        model="gpt-4o",
-        messages=[{"role": "user", "content": prompt}],
-        temperature=0.2
-    )
-
-    return response.choices[0].message.content.strip()
-
-
 # 유사 레시피 검색 함수
-def search_similar_recipe(user_input, top_n=3):
+def search_similar_recipe(user_input, top_n=6):
     user_embedding = get_embedding(user_input)
     distances, indices = faiss_index.search(user_embedding, top_n)
 
@@ -229,16 +150,6 @@ def generate_recipe():
     if not user_input:
         return jsonify({"error": "user_input 파라미터가 필요합니다."}), 400
 
-    # 사용자 입력 원본
-    print("origin user_input",user_input)
-
-    # 재료 추출
-    extracted_ingredients = extract_ingredients(user_input)
-    # 추출된 재료 확인
-    print(f"extracted_ingredients: {extracted_ingredients}")
-    
-    user_input = extracted_ingredients
-    
     # GPT 프롬프트 생성
     prompt = generate_prompt(user_input)
     #print(f"\n[ 최종 프롬프트 확인]\n{prompt}")
