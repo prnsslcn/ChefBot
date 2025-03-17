@@ -7,7 +7,7 @@ from dotenv import load_dotenv
 # 현재 FAISS 인덱스와 레시피 데이터를 활용하여 유사 레시피 검색 후 반환까지 테스트 진행
 
 # OpenAI API 설정
-load_dotenv(verbose=True)
+load_dotenv()
 API_KEY = os.getenv("OPENAI_API_KEY")
 client = OpenAI(api_key=API_KEY)
 
@@ -54,15 +54,20 @@ def search_similar_recipe(user_input, top_n=3):
 # 테스트용 
 if __name__ == "__main__":
     # 입력 받기
-    user_input = input("재료나 메뉴를 입력하세요: ")
-    # 유사 레시피 검색
-    results = search_similar_recipe(user_input, top_n=3)
+    while True:
+        user_input = input("재료나 메뉴를 입력하세요: ")
 
-    print("\n 검색된 유사 레시피:")
-    for idx, recipe in enumerate(results):
-        print(f"\n{idx+1}. {recipe['name']}")
-        print(f"   재료: {recipe['ingredients']}")
-        print(f"   조리법: {recipe['recipe'][:2]}...")  # 조리법은 2단계까지만 출력 (앞부분만)
+        if user_input == "exit":
+            break
+        # 유사 레시피 검색
+        results = search_similar_recipe(user_input, top_n=3)
+
+        print("\n 검색된 유사 레시피:")
+        for idx, recipe in enumerate(results):
+            print(f"\n{idx+1}. {recipe['name']}")
+            print(f"   재료: {recipe['ingredients']}")
+            print(f"   조리법: {recipe['recipe'][:2]}...")  # 조리법은 2단계까지만 출력 (앞부분만)
+    
 
 
 

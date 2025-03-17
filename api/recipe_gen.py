@@ -13,7 +13,7 @@ from dotenv import load_dotenv
 app = Flask(__name__)
 
 # OpenAI API 키
-load_dotenv()
+load_dotenv(veerbose=True)
 API_KEY = os.getenv("OPENAI_API_KEY")
 client = OpenAI(api_key=API_KEY)
 
