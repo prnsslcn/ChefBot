@@ -2,9 +2,16 @@ import React, { useMemo, useState, useEffect } from "react";
 import { useChat } from "../context/ChatContext";
 
 const AllChatBubble = () => {
-  const { allMessages } = useChat();
+  const { allMessages, setAiResponse, setMessages, setAllMessages } = useChat();
   const [currentStep, setCurrentStep] = useState(0);
   const [showSteps, setShowSteps] = useState(false);
+
+  const handleReTry = () => {
+    setAiResponse([])
+    setMessages([])
+    setAllMessages(["어떤 요리를 만들고 싶으세요?"])
+    setShowSteps(false)
+  }
 
   useEffect(() => {
     if (
@@ -73,7 +80,6 @@ const AllChatBubble = () => {
             );
           }
         }
-
         return null;
       }),
     [allMessages, showSteps, currentStep]
@@ -110,23 +116,25 @@ const AllChatBubble = () => {
               <button
                 className={`btn text-xl p-6 mt-4 ${
                   currentStep <
-                  (allMessages.find((msg) => msg.recipe?.steps)?.recipe?.steps
-                    .length || 0) -
-                    1
+                  (allMessages.find((msg) => msg.recipe?.steps)?.recipe?.steps.length || 0) - 1
                     ? "bg-emerald-400 text-emerald-900"
                     : "bg-red-400 text-white"
                 }`}
-                onClick={() =>
-                  handleNextStep(
-                    allMessages.find((msg) => msg.recipe?.steps)?.recipe
-                      ?.steps || []
-                  )
-                }
+                onClick={() => {
+                  if (
+                    currentStep >=
+                    (allMessages.find((msg) => msg.recipe?.steps)?.recipe?.steps.length || 0) - 1
+                  ) {
+                    handleReTry(); // 👉 "다시 시작"을 눌렀을 때 초기화
+                  } else {
+                    handleNextStep(
+                      allMessages.find((msg) => msg.recipe?.steps)?.recipe?.steps || []
+                    );
+                  }
+                }}
               >
                 {currentStep <
-                (allMessages.find((msg) => msg.recipe?.steps)?.recipe?.steps
-                  .length || 0) -
-                  1
+                (allMessages.find((msg) => msg.recipe?.steps)?.recipe?.steps.length || 0) - 1
                   ? "다음"
                   : "다시 시작"}
               </button>
