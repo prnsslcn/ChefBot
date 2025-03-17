@@ -47,10 +47,6 @@ for filename in os.listdir(json_dir):
 # Few-Shot Learning 예제
 samples = [
     {
-        "input": "두바이",
-        "output": "두바이 초콜릿 만드는 방법\n1. 카카오 열매를 발효 후 건조시킵니다.\n2. 초콜릿 원료를 정제하고 가공하여 부드러운 질감을 만듭니다.\n3. 다양한 견과류와 향신료를 추가해 두바이 스타일 초콜릿을 완성합니다."
-    },
-    {
         "input": "피카소",
         "output": "피카소 스타일 푸드 아트 만드는 방법\n1. 다양한 색상의 소스를 준비합니다.\n2. 접시에 소스를 붓으로 칠하듯이 배치합니다.\n3. 미니멀한 재료 배치를 통해 예술적인 플레이팅을 완성합니다."
     },
@@ -125,18 +121,6 @@ def search_similar_recipe(user_input, top_n=3):
             similar_recipes.append(all_recipes[recipe_idx])
     
     return similar_recipes
-
-# GPT 프롬프트 생성
-# def generate_prompt(user_input):
-#     selected_examples = example_selector.select_examples({"input": user_input})
-#     example_text = "\n".join([f"입력: {ex['input']}\n출력: {ex['output']}" for ex in selected_examples])
-
-#     # 유사 레시피 검색 결과 추가
-#     similar_recipes = search_similar_recipe(user_input, top_n=3)
-#     recipe_text = "\n\n".join([f"레시피: {recipe['name']}\n재료: {', '.join(recipe['ingredients'])}" for recipe in similar_recipes])
-
-#     prompt = f"예제:\n{example_text}\n\n추천 레시피:\n{recipe_text}\n\n질문: {user_input}\n답변:"
-#     return prompt
 
 def generate_prompt(user_input):
     selected_examples = example_selector.select_examples({"input": user_input})
