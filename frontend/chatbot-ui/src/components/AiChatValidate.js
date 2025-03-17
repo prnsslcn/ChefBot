@@ -11,8 +11,10 @@ export const AiChatValidate = () => {
     allMessages,
     isAiResponding,
     setIsAiResponding,
+    optionCheck
   } = useChat();
 
+  
   useEffect(() => {
     if (callResponse && !isAiResponding) {
       const fetchAiResponse = async () => {

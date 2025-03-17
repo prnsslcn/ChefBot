@@ -1,9 +1,9 @@
 import axios from "axios";
 import { customAxios } from "./axiosCustom"
 
-export const postQuery = async ( user_input ) => {
+export const postQuery = async ( user_input, category ) => {
     try {
-        const response = await customAxios.post('/query', user_input)
+        const response = await customAxios.post('/query', {user_input, category})
         return response.data;
     } catch (error) {
         throw error;
