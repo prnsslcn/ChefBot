@@ -7,7 +7,7 @@ from dotenv import load_dotenv
 # 현재 FAISS 인덱스와 레시피 데이터를 활용하여 유사 레시피 검색 후 반환까지 테스트 진행
 
 # OpenAI API 설정
-load_dotenv()
+load_dotenv(verbose=True)
 API_KEY = os.getenv("OPENAI_API_KEY")
 client = OpenAI(api_key=API_KEY)
 
@@ -62,4 +62,7 @@ if __name__ == "__main__":
     for idx, recipe in enumerate(results):
         print(f"\n{idx+1}. {recipe['name']}")
         print(f"   재료: {recipe['ingredients']}")
-        print(f"   조리법: {recipe['recipe'][:2]}...")  # 조리법은 2단계까지만 출력
+        print(f"   조리법: {recipe['recipe'][:2]}...")  # 조리법은 2단계까지만 출력 (앞부분만)
+
+
+
