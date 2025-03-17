@@ -14,7 +14,6 @@ const AllChatBubble = () => {
     setAllMessages(['어떤 요리를 만들고 싶으세요?']);
   }
 
-
   console.log(allMessages)
 
   const renderedMessages = useMemo(() =>
