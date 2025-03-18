@@ -11,11 +11,9 @@ export const AiChatValidate = () => {
     allMessages,
     isAiResponding,
     setIsAiResponding,
-    optionCheck,
     messages
   } = useChat();
 
-  
   useEffect(() => {
     if (callResponse && !isAiResponding) {
       const fetchAiResponse = async () => {
@@ -27,16 +25,16 @@ export const AiChatValidate = () => {
           const newMessages = [
             {
               type: "text",
-              content: `${response.recipe.title} 어떤가요?`,
+              content: `${response.data.recipe.title} 어떤가요?`,
             },
             {
               type: "text",
-              content: `📌 재료 : ${response.recipe.ingredients}`,
+              content: `📌 재료 : ${response.data.recipe.ingredients}`,
             },
-            { type: "image", content: response.image_url },
+            { type: "image", content: response.data.image_url },
             {
               type: "text",
-              content: `${response.recipe.title}을 만들고 싶다면 "시작" 버튼을 눌러주세요`,
+              content: `${response.data.recipe.title}을 만들고 싶다면 "시작" 버튼을 눌러주세요`,
             },
           ];
 
@@ -54,7 +52,7 @@ export const AiChatValidate = () => {
           
             setAllMessages((prev) => [
               ...prev,
-              { recipe: { steps: response.recipe.steps } },
+              { recipe: { steps: response.data.recipe.steps } },
             ]);
           
             setIsAiResponding(false);

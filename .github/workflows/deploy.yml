@@ -1,0 +1,70 @@
+name: Deploy Flask App on EC2
+
+on:
+  push:
+    branches:
+      - develop
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: GitHub Repository Checkout
+        uses: actions/checkout@v4
+
+      - name: Install Docker on EC2 (설치가 안 되어 있다면)
+        uses: appleboy/ssh-action@v1.2.0
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USER }}
+          key: ${{ secrets.EC2_KEY }}
+          script: |
+            echo "Docker 설치 확인 및 설정"
+            if ! command -v docker &> /dev/null
+            then
+                sudo apt update
+                sudo apt install -y docker.io docker-compose
+                sudo systemctl start docker
+                sudo systemctl enable docker
+            fi
+            sudo usermod -aG docker $USER
+
+      - name: Upload Flask Project to EC2
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USER }}
+          key: ${{ secrets.EC2_KEY }}
+          source: "."  # 현재 프로젝트 전체 업로드
+          target: "/home/ubuntu/flask_app"
+
+      - name: Deploy Flask App on EC2
+        uses: appleboy/ssh-action@v1.2.0
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USER }}
+          key: ${{ secrets.EC2_KEY }}
+          script: |
+            echo "ChefBot 애플리케이션 배포 시작"
+            cd /home/ubuntu/flask_app
+
+            # .env 파일 동적으로 생성 (GitHub Secrets 사용)
+            echo "OPENAI_API_KEY=${{ secrets.OPENAI_API_KEY }}" > .env
+
+            # 기존 컨테이너 종료 및 삭제
+            echo "기존 컨테이너 종료"
+            docker-compose down
+
+            # Docker 컨테이너 실행
+            echo "새 컨테이너 실행"
+            docker-compose up -d --build
+
+            # 실행된 컨테이너 확인
+            docker ps
+
+            # 앱 로그 확인
+            sleep 5
+            docker logs -f flask-app
+
+            echo "ChefBot 애플리케이션 배포 완료"
