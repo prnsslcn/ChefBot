@@ -323,7 +323,7 @@ def parse_output(output_text):
 
     return ingredients, steps
 
-
+# 
 # 사용자 입력을 벡터화하는 함수
 def get_embedding(user_input):
     response = client.embeddings.create(
