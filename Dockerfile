@@ -8,6 +8,9 @@ WORKDIR /app
 COPY requirements.txt requirements.txt
 RUN pip install --no-cache-dir -r requirements.txt
 
+# gevent 설치 추가
+RUN pip install gevent
+
 # 애플리케이션 코드 복사
 COPY . .
 
