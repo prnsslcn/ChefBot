@@ -446,7 +446,7 @@ def generate_prompt(user_input,input_category):
     해당 카테고리의 몇가지 음식 예시입니다.:
     {recommended_foods}
 
-    질문이 잘못된 질문의 예시 답변 
+    질문이 잘못된 경우 예시 답변 
     invalid_example:
     {invalid_structured_examples}
 
