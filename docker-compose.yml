@@ -12,5 +12,5 @@ services:
           memory: 512m
     env_file:
       - .env 
-    restart: always
+    restart: never
     command: gunicorn -w 2 -k gevent -b 0.0.0.0:5001 app:app
