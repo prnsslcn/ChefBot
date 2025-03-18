@@ -1,7 +1,6 @@
 import { useEffect } from "react";
 import { useChat } from "../context/ChatContext";
 import { postQuery } from "../api/getQuery";
-import { LoadingSpinner } from "./LoadingSpinner";
 
 export const AiChatValidate = () => {
   const {
@@ -22,7 +21,6 @@ export const AiChatValidate = () => {
       const fetchAiResponse = async () => {
         try {
           setIsAiResponding(true);
-          // const response = await axios.get("http://localhost:5001/1");
           const response = await postQuery(messages[messages.length - 1])
           console.log("대답 : ",response)
           // ai 레시피 제안
@@ -42,32 +40,34 @@ export const AiChatValidate = () => {
             },
           ];
 
-          // 메시지를 하나씩 추가하는 함수
           const addMessagesSequentially = async () => {
-            for (const message of newMessages) {
-              await new Promise((resolve) => setTimeout(resolve, 1000)); // 1초 간격
-              setAiResponse((prev) => [...prev, message]);
-              setAllMessages((prev) => [...prev, message]);
+            for (let i = 0; i < newMessages.length; i++) {
+              if(i === 0){
+                await new Promise((resolve) => setTimeout(resolve, 300));
+              }
+              else if (i !== 0) {
+                await new Promise((resolve) => setTimeout(resolve, 1000));
+              }
+              setAiResponse((prev) => [...prev, newMessages[i]]);
+              setAllMessages((prev) => [...prev, newMessages[i]]);
             }
-
-            // 마지막 메시지 추가 후 steps 저장
+          
             setAllMessages((prev) => [
               ...prev,
               { recipe: { steps: response.recipe.steps } },
             ]);
-
-            setIsAiResponding(false); // 메시지 추가 완료
+          
+            setIsAiResponding(false);
           };
 
+          setCallResponse(false);
           addMessagesSequentially();
         } catch (error) {
           console.log(error);
           setIsAiResponding(false);
         }
       };
-
       fetchAiResponse();
-      setCallResponse(false); // 통신 완료 후 callResponse 리셋
     }
   }, [callResponse, isAiResponding]);
 
@@ -76,5 +76,5 @@ export const AiChatValidate = () => {
     console.log("Updated allMessages:", allMessages);
   }, [allMessages]); // allMessages가 변경될 때마다 실행됨
 
-  return isAiResponding ? <LoadingSpinner /> : null;
+  return null;
 };
