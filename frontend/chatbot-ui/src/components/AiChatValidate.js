@@ -1,7 +1,6 @@
 import { useEffect } from "react";
 import { useChat } from "../context/ChatContext";
-import { postQuery } from "../api/getQuery";
-import { LoadingSpinner } from "./LoadingSpinner";
+import axios from "axios";
 
 export const AiChatValidate = () => {
   const {
@@ -12,33 +11,29 @@ export const AiChatValidate = () => {
     allMessages,
     isAiResponding,
     setIsAiResponding,
-    optionCheck,
-    messages
   } = useChat();
 
-  
   useEffect(() => {
     if (callResponse && !isAiResponding) {
       const fetchAiResponse = async () => {
         try {
           setIsAiResponding(true);
-          // const response = await axios.get("http://localhost:5001/1");
-          const response = await postQuery(messages[messages.length - 1])
-          console.log("대답 : ",response)
+          const response = await axios.get("http://localhost:5001/1");
+
           // ai 레시피 제안
           const newMessages = [
             {
               type: "text",
-              content: `${response.recipe.title} 어떤가요?`,
+              content: `${response.data.recipe.title} 어떤가요?`,
             },
             {
               type: "text",
-              content: `📌 재료 : ${response.recipe.ingredients}`,
+              content: `📌 재료 : ${response.data.recipe.ingredients}`,
             },
-            { type: "image", content: response.image_url },
+            { type: "image", content: response.data.image_url },
             {
               type: "text",
-              content: `${response.recipe.title}을 만들고 싶다면 "시작" 버튼을 눌러주세요`,
+              content: `${response.data.recipe.title}을 만들고 싶다면 "시작" 버튼을 눌러주세요`,
             },
           ];
 
@@ -53,7 +48,7 @@ export const AiChatValidate = () => {
             // 마지막 메시지 추가 후 steps 저장
             setAllMessages((prev) => [
               ...prev,
-              { recipe: { steps: response.recipe.steps } },
+              { recipe: { steps: response.data.recipe.steps } },
             ]);
 
             setIsAiResponding(false); // 메시지 추가 완료
@@ -76,5 +71,5 @@ export const AiChatValidate = () => {
     console.log("Updated allMessages:", allMessages);
   }, [allMessages]); // allMessages가 변경될 때마다 실행됨
 
-  return isAiResponding ? <LoadingSpinner /> : null;
+  return null;
 };
