@@ -4,15 +4,8 @@ import { postQuery } from "../api/getQuery";
 
 export const UserInput = () => {
   const [userInput, setUserInput] = useState("");
-  const {
-    isAiResponding,
-    setMessages,
-    setCallResponse,
-    setAllMessages,
-    optionCheck,
-    setOptionCheck,
-    setAiResponse,
-  } = useChat();
+  const { isAiResponding,setMessages, setCallResponse, setAllMessages, optionCheck, setOptionCheck, setAiResponse } = useChat();
+
 
   const handleInputChange = (e) => {
     setUserInput(e.target.value);

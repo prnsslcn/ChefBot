@@ -9,8 +9,8 @@ export const ChatProvider = ({ children }) => {
   const [allMessages, setAllMessages] = useState([
     "어떤 요리를 만들고 싶으세요?",
   ]);
-  const [optionCheck, setOptionCheck] = useState("");
   const [isAiResponding, setIsAiResponding] = useState(false);
+  const [optionCheck, setOptionCheck] = useState("");
 
   return (
     <ChatContext.Provider
