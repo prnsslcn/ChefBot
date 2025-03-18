@@ -446,7 +446,7 @@ def generate_prompt(user_input,input_category):
     해당 카테고리의 몇가지 음식 예시입니다.:
     {recommended_foods}
 
-    질문이 잘못된 경우 예시 답변 
+    질문이 잘못된 질문의 예시 답변 
     invalid_example:
     {invalid_structured_examples}
 
@@ -476,12 +476,12 @@ def get_recipe_from_gpt(prompt):
 @app.route("/generate-recipe", methods=["POST"])
 def generate_recipe():
     data = request.get_json()
-    user_input = data.get("user_input", "")
+    user_input = data.get("user_input", "").strip()  # 문자열 공백 제거
+    input_category = data.get("input_category", "").strip()  # 카테고리 추가
 
     if not user_input:
         return jsonify({"error": "user_input 파라미터가 필요합니다."}), 400
 
-    input_category='일식'
     # GPT 프롬프트 생성
     prompt = generate_prompt(user_input,input_category)
     print(f"\n[ 최종 프롬프트 확인]\n{prompt}")
