@@ -3,7 +3,7 @@ import { customAxios } from "./axiosCustom"
 
 export const postQuery = async ( user_input ) => {
     try {
-        const response = await customAxios.post('/query', user_input)
+        const response = await customAxios.post('/query', {user_input});
         return response.data;
     } catch (error) {
         throw error;

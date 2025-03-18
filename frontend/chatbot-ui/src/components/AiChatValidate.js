@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 import { useChat } from "../context/ChatContext";
-import axios from "axios";
+import { postQuery } from "../api/getQuery";
 
 export const AiChatValidate = () => {
   const {
@@ -11,58 +11,63 @@ export const AiChatValidate = () => {
     allMessages,
     isAiResponding,
     setIsAiResponding,
+    optionCheck,
+    messages
   } = useChat();
 
+  
   useEffect(() => {
     if (callResponse && !isAiResponding) {
       const fetchAiResponse = async () => {
         try {
           setIsAiResponding(true);
-          const response = await axios.get("http://localhost:5001/1");
-
+          const response = await postQuery(messages[messages.length - 1])
+          console.log("대답 : ",response)
           // ai 레시피 제안
           const newMessages = [
             {
               type: "text",
-              content: `${response.data.recipe.title} 어떤가요?`,
+              content: `${response.recipe.title} 어떤가요?`,
             },
             {
               type: "text",
-              content: `📌 재료 : ${response.data.recipe.ingredients}`,
+              content: `📌 재료 : ${response.recipe.ingredients}`,
             },
-            { type: "image", content: response.data.image_url },
+            { type: "image", content: response.image_url },
             {
               type: "text",
-              content: `${response.data.recipe.title}을 만들고 싶다면 "시작" 버튼을 눌러주세요`,
+              content: `${response.recipe.title}을 만들고 싶다면 "시작" 버튼을 눌러주세요`,
             },
           ];
 
-          // 메시지를 하나씩 추가하는 함수
           const addMessagesSequentially = async () => {
-            for (const message of newMessages) {
-              await new Promise((resolve) => setTimeout(resolve, 1000)); // 1초 간격
-              setAiResponse((prev) => [...prev, message]);
-              setAllMessages((prev) => [...prev, message]);
+            for (let i = 0; i < newMessages.length; i++) {
+              if(i === 0){
+                await new Promise((resolve) => setTimeout(resolve, 300));
+              }
+              else if (i !== 0) {
+                await new Promise((resolve) => setTimeout(resolve, 1000));
+              }
+              setAiResponse((prev) => [...prev, newMessages[i]]);
+              setAllMessages((prev) => [...prev, newMessages[i]]);
             }
-
-            // 마지막 메시지 추가 후 steps 저장
+          
             setAllMessages((prev) => [
               ...prev,
-              { recipe: { steps: response.data.recipe.steps } },
+              { recipe: { steps: response.recipe.steps } },
             ]);
-
-            setIsAiResponding(false); // 메시지 추가 완료
+          
+            setIsAiResponding(false);
           };
 
+          setCallResponse(false);
           addMessagesSequentially();
         } catch (error) {
           console.log(error);
           setIsAiResponding(false);
         }
       };
-
       fetchAiResponse();
-      setCallResponse(false); // 통신 완료 후 callResponse 리셋
     }
   }, [callResponse, isAiResponding]);
 
