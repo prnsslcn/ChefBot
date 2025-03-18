@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { useChat } from "../context/ChatContext";
+import { postQuery } from "../api/getQuery";
 
 export const UserInput = () => {
   const [userInput, setUserInput] = useState("");
@@ -17,15 +18,32 @@ export const UserInput = () => {
   const category = ["한식", "일식", "중식", "양식"];
 
   const handleSubmit = async () => {
+    if (!optionCheck) {
+      const noCategoryMessage = {
+        type: "text",
+        content: "🚨 카테고리를 선택해주세요.",
+      };
+      setMessages((prev) => [...prev, noCategoryMessage]);
+      setAllMessages((prev) => [...prev, noCategoryMessage]);
+      return;
+    }
+
     if (userInput.trim() !== "" && !isAiResponding) {
       setMessages((prevMessages) => [...prevMessages, userInput]);
       setAllMessages((prevMessages) => [...prevMessages, userInput]);
       setCallResponse(true);
       setUserInput("");
+
+      try {
+        const response = await postQuery(userInput, optionCheck);
+        console.log(response);
+      } catch (err) {
+        console.log(err);
+      }
     }
   };
 
-  const handleKeyDown = (e) => {
+  const handleKeyUp = (e) => {
     if (e.key === "Enter") {
       e.preventDefault();
       handleSubmit();
@@ -33,7 +51,8 @@ export const UserInput = () => {
   };
 
   return (
-    <div className="bg-white p-6 rounded-lg shadow-md">
+    <div className="bg-white p-6 relative rounded-b-xl border-b border-l border-r border-stone-300">
+      <div className="font-semibold mb-2 text-lime-950">카테고리(필수)</div>
       <div className="flex space-x-4 mb-4">
         {category.map((category, idx) => (
           <label key={idx} className="flex items-center space-x-2">
@@ -47,7 +66,6 @@ export const UserInput = () => {
           </label>
         ))}
       </div>
-
       <div className="relative flex items-center">
         <input
           type="text"
@@ -55,10 +73,10 @@ export const UserInput = () => {
           className="input input-xl w-full pr-28 p-3 border border-gray-300 rounded-lg focus:outline-none"
           value={userInput}
           onChange={handleInputChange}
-          onKeyUp={handleKeyDown}
+          onKeyUp={handleKeyUp}
         />
         <button
-          className="btn absolute right-9 top-1/2 transform -translate-y-1/2"
+          className="btn absolute right-5 top-1/2 transform -translate-y-1/2"
           onClick={handleSubmit}
           disabled={isAiResponding}
         >
