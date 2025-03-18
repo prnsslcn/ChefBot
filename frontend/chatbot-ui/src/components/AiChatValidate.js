@@ -1,7 +1,7 @@
 import { useEffect } from "react";
 import { useChat } from "../context/ChatContext";
-import axios from "axios";
 import { postQuery } from "../api/getQuery";
+import { LoadingSpinner } from "./LoadingSpinner";
 
 export const AiChatValidate = () => {
   const {
@@ -76,5 +76,5 @@ export const AiChatValidate = () => {
     console.log("Updated allMessages:", allMessages);
   }, [allMessages]); // allMessages가 변경될 때마다 실행됨
 
-  return null;
+  return isAiResponding ? <LoadingSpinner /> : null;
 };

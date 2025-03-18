@@ -3,7 +3,7 @@ import { useChat } from "../context/ChatContext";
 
 export const UserInput = () => {
   const [userInput, setUserInput] = useState("");
-  const { setMessages, setCallResponse, setAllMessages, optionCheck, setOptionCheck } = useChat();
+  const { isAiResponding,setMessages, setCallResponse, setAllMessages, optionCheck, setOptionCheck } = useChat();
 
   const handleInputChange = (e) => {
     setUserInput(e.target.value);
@@ -16,7 +16,7 @@ export const UserInput = () => {
   const category = ["한식", "일식", "중식", "양식"];
 
   const handleSubmit = async () => {
-    if (userInput.trim() !== "") {
+    if (userInput.trim() !== "" && !isAiResponding) {
       setMessages((prevMessages) => [...prevMessages, userInput]);
       setAllMessages((prevMessages) => [...prevMessages, userInput]);
       setCallResponse(true);
@@ -40,7 +40,7 @@ export const UserInput = () => {
               type="checkbox"
               checked={optionCheck === category}
               onChange={() => handleCheckboxChange(category)}
-              className="w-5 h-5 accent-blue-500 cursor-pointer"
+              className="checkbox checkbox-primary"
             />
             <span>{category}</span>
           </label>
@@ -59,6 +59,7 @@ export const UserInput = () => {
         <button
           className="btn absolute right-9 top-1/2 transform -translate-y-1/2"
           onClick={handleSubmit}
+          disabled={isAiResponding}
         >
           전송
           <svg
