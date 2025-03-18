@@ -128,19 +128,19 @@ def generate_prompt(user_input):
     similar_recipes = search_similar_recipe(user_input, top_n=3)
     recipe_text = "\n\n".join([f"레시피 이름: {r['name']}\n재료: {r['ingredients']}" for r in similar_recipes])
     prompt = f"""
-다음 사용자 입력과 유사한 레시피 데이터를 참고하여 요리를 추천해주세요.
-아래 JSON 형식으로만 응답해주세요. 설명은 하지 마세요:
-{{
-  "title": "요리 이름",
-  "ingredients": ["재료1", "재료2", "재료3"],
-  "steps": ["1단계 설명", "2단계 설명", "3단계 설명", "n단계 설명"] 
-}}
+        다음 사용자 입력과 유사한 레시피 데이터를 참고하여 요리를 추천해주세요.
+        아래 JSON 형식으로만 응답해주세요. 설명은 하지 마세요:
+        {{
+        "title": "요리 이름",
+        "ingredients": ["재료1", "재료2", "재료3"],
+        "steps": ["1단계 설명", "2단계 설명", "3단계 설명", "n단계 설명"] 
+        }}
 
-참고 레시피:
-{recipe_text}
+        참고 레시피:
+        {recipe_text}
 
-사용자 입력: {user_input}
-"""
+        사용자 입력: {user_input}
+        """
     return prompt
 
 def get_recipe_from_gpt(prompt):
