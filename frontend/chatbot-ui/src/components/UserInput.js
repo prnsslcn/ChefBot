@@ -1,9 +1,10 @@
 import React, { useState } from "react";
 import { useChat } from "../context/ChatContext";
+import { postQuery } from "../api/getQuery";
 
 export const UserInput = () => {
   const [userInput, setUserInput] = useState("");
-  const { setMessages, setCallResponse, setAllMessages } = useChat();
+  const { setMessages, setCallResponse, setAllMessages, setAiResponse } = useChat();
 
   const handleInputChange = (e) => {
     setUserInput(e.target.value);
@@ -14,7 +15,46 @@ export const UserInput = () => {
       setMessages((prevMessages) => [...prevMessages, userInput]);
       setAllMessages((prevMessages) => [...prevMessages, userInput]);
       setCallResponse(true);
+
+      try {
+        const response = await postQuery(userInput);
+
+        const newMessages = [
+          {
+            type: "text",
+            content: `${response.recipe.title} 어떤가요?`,
+          },
+          {
+            type: "text",
+            content: `📌 재료 : ${response.recipe.ingredients.join(", ")}`,
+          },
+          {
+            type: "image",
+            content: response.image_url,
+          },
+          {
+            type: "text",
+            content: `${response.recipe.title}을 만들고 싶다면 "시작" 버튼을 눌러주세요`,
+          },
+        ];
+
+        for (const msg of newMessages) {
+          await new Promise((res) => setTimeout(res, 1000));
+          setAiResponse((prev) => [...prev, msg]);
+          setAllMessages((prev) => [...prev, msg]);
+        }
+
+        // 레시피 조리 단계를 마지막에 추가
+        setAllMessages((prev) => [
+          ...prev,
+          { recipe: { steps: response.recipe.steps } },
+        ]);
+      } catch (error) {
+        console.error("AI 요청 실패:", error);
+      }
+
       setUserInput("");
+      setCallResponse(false);
     }
   };
 
