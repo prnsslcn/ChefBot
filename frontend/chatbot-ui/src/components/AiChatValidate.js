@@ -1,6 +1,7 @@
 import { useEffect } from "react";
 import { useChat } from "../context/ChatContext";
 import axios from "axios";
+import { postQuery } from "../api/getQuery";
 
 export const AiChatValidate = () => {
   const {
@@ -11,7 +12,8 @@ export const AiChatValidate = () => {
     allMessages,
     isAiResponding,
     setIsAiResponding,
-    optionCheck
+    optionCheck,
+    messages
   } = useChat();
 
   
@@ -20,22 +22,23 @@ export const AiChatValidate = () => {
       const fetchAiResponse = async () => {
         try {
           setIsAiResponding(true);
-          const response = await axios.get("http://localhost:5001/1");
-
+          // const response = await axios.get("http://localhost:5001/1");
+          const response = await postQuery(messages[messages.length - 1])
+          console.log("대답 : ",response)
           // ai 레시피 제안
           const newMessages = [
             {
               type: "text",
-              content: `${response.data.recipe.title} 어떤가요?`,
+              content: `${response.recipe.title} 어떤가요?`,
             },
             {
               type: "text",
-              content: `📌 재료 : ${response.data.recipe.ingredients}`,
+              content: `📌 재료 : ${response.recipe.ingredients}`,
             },
-            { type: "image", content: response.data.image_url },
+            { type: "image", content: response.image_url },
             {
               type: "text",
-              content: `${response.data.recipe.title}을 만들고 싶다면 "시작" 버튼을 눌러주세요`,
+              content: `${response.recipe.title}을 만들고 싶다면 "시작" 버튼을 눌러주세요`,
             },
           ];
 
@@ -50,7 +53,7 @@ export const AiChatValidate = () => {
             // 마지막 메시지 추가 후 steps 저장
             setAllMessages((prev) => [
               ...prev,
-              { recipe: { steps: response.data.recipe.steps } },
+              { recipe: { steps: response.recipe.steps } },
             ]);
 
             setIsAiResponding(false); // 메시지 추가 완료
