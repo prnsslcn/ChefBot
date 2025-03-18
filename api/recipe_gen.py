@@ -9,6 +9,9 @@ from langchain_openai import OpenAIEmbeddings, ChatOpenAI
 from langchain_community.vectorstores import FAISS
 from langchain.prompts.example_selector import MaxMarginalRelevanceExampleSelector
 from dotenv import load_dotenv
+from sentence_transformers import SentenceTransformer
+from sklearn.neighbors import NearestNeighbors
+import numpy as np
 
 # Flask 앱 초기화
 app = Flask(__name__)
@@ -262,6 +265,51 @@ samples = [
     }
 ]
 
+### 카테고리
+# SBERT 모델 로드
+model = SentenceTransformer('all-MiniLM-L6-v2')
+
+# 카테고리별 음식 매핑
+category_foods = {
+    "한식": ["김치찌개", "비빔밥", "불고기", "된장찌개", "잡채"],
+    "중식": ["짜장면", "짬뽕", "마파두부", "꿔바로우", "양장피"],
+    "양식": ["파스타", "스테이크", "피자", "크림스프", "햄버거"],
+    "일식": ["스시", "라멘", "돈카츠", "타코야끼", "오코노미야끼"]
+}
+
+# 카테고리 리스트
+X_train = list(category_foods.keys())
+# 카테고리 문장 임베딩 생성
+X_train_vec = model.encode(X_train)
+# 최근접 이웃 모델 학습 (카테고리 분류용)
+knn = NearestNeighbors(n_neighbors=1, metric="cosine")
+knn.fit(X_train_vec)
+
+def recommend_foods(category_input):
+    """
+    입력된 카테고리에 해당하는 음식 5개 추천
+    """
+    #  category_input이 비어 있거나 None이면 빈 값 반환
+    if not category_input or category_input.strip() == "":
+        return None, []
+    
+    category_vec = model.encode([category_input])  # 입력값 임베딩
+    _, indices = knn.kneighbors(category_vec)  # 가장 가까운 카테고리 찾기
+    predicted_category = X_train[indices[0][0]]  # 예측된 카테고리
+
+    # 디버깅용 출력
+    print(f"🔹 입력값: {category_input}")
+    print(f"🔹 예측된 카테고리: {predicted_category}")
+
+    recommended_foods = category_foods.get(predicted_category, [])
+
+    # 디버깅용 출력
+    print(f"🔹 추천 음식 리스트: {recommended_foods}")
+
+    return predicted_category, recommended_foods
+###
+
+
 # 잘못된 질문용 데이터 변환 (Few-Shot Learning을 위해 input-output 변환)
 invalid_samples_for_selector = [
     {
@@ -278,6 +326,7 @@ samples_for_selector = [
     }
     for recipe in samples
 ]
+
 
 
 # MMR 기반 예제 선택기 (잘못된 질문용)
@@ -345,9 +394,11 @@ def search_similar_recipe(user_input, top_n=3):
     
     return similar_recipes
 
-def generate_prompt(user_input):
-    selected_examples = example_selector.select_examples({"input": user_input})
+def generate_prompt(user_input,input_category):
+    #카테고리
+    predicted_category, recommended_foods = recommend_foods(input_category)
 
+    selected_examples = example_selector.select_examples({"input": user_input})
     invalid_selected_examples = invalid_example_selector.select_examples({"input": user_input})
 
     #  '출력'에서 '재료'와 '과정'을 추출
@@ -389,7 +440,13 @@ def generate_prompt(user_input):
     참고 레시피 - 2:
     {structured_examples}
 
-    질문이 잘못된 경우 예시 답변 
+    반드시 해당 카테고리의 음식을 추천해주세요:
+    {input_category}
+
+    해당 카테고리의 몇가지 음식 예시입니다.:
+    {recommended_foods}
+
+    질문이 잘못된 질문의 예시 답변 
     invalid_example:
     {invalid_structured_examples}
 
@@ -419,13 +476,14 @@ def get_recipe_from_gpt(prompt):
 @app.route("/generate-recipe", methods=["POST"])
 def generate_recipe():
     data = request.get_json()
-    user_input = data.get("user_input", "")
+    user_input = data.get("user_input", "").strip()  # 문자열 공백 제거
+    input_category = data.get("category", "").strip()  # 카테고리 추가
 
     if not user_input:
         return jsonify({"error": "user_input 파라미터가 필요합니다."}), 400
 
     # GPT 프롬프트 생성
-    prompt = generate_prompt(user_input)
+    prompt = generate_prompt(user_input,input_category)
     print(f"\n[ 최종 프롬프트 확인]\n{prompt}")
 
     # GPT로부터 답변 생성 (Chat 모델 형식)
