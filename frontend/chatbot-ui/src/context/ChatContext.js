@@ -7,20 +7,26 @@ export const ChatProvider = ({ children }) => {
   const [aiResponse, setAiResponse] = useState([]);
   const [callResponse, setCallResponse] = useState(false);
   const [allMessages, setAllMessages] = useState([
-    "어떤 요리를 만들고 싶으세요?"
+    "어떤 요리를 만들고 싶으세요?",
   ]);
-  const [optionCheck, setOptionCheck] = useState("한식");
+  const [optionCheck, setOptionCheck] = useState("");
   const [isAiResponding, setIsAiResponding] = useState(false);
 
   return (
     <ChatContext.Provider
       value={{
-        messages,setMessages,
-        aiResponse,setAiResponse,
-        callResponse,setCallResponse,
-        allMessages,setAllMessages,
-        isAiResponding,setIsAiResponding,
-        optionCheck, setOptionCheck
+        messages,
+        setMessages,
+        aiResponse,
+        setAiResponse,
+        callResponse,
+        setCallResponse,
+        allMessages,
+        setAllMessages,
+        isAiResponding,
+        setIsAiResponding,
+        optionCheck,
+        setOptionCheck,
       }}
     >
       {children}
