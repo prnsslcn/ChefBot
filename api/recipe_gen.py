@@ -323,7 +323,7 @@ def parse_output(output_text):
 
     return ingredients, steps
 
-# 
+
 # 사용자 입력을 벡터화하는 함수
 def get_embedding(user_input):
     response = client.embeddings.create(
@@ -347,6 +347,7 @@ def search_similar_recipe(user_input, top_n=3):
 
 def generate_prompt(user_input):
     selected_examples = example_selector.select_examples({"input": user_input})
+
     invalid_selected_examples = invalid_example_selector.select_examples({"input": user_input})
 
     #  '출력'에서 '재료'와 '과정'을 추출
