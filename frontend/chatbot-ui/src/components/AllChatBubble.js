@@ -1,8 +1,9 @@
 import React, { useMemo, useState, useEffect, useRef } from "react";
 import { useChat } from "../context/ChatContext";
+import { LoadingSpinner } from "./LoadingSpinner";
 
 const AllChatBubble = () => {
-  const { allMessages, setAiResponse, setMessages, setAllMessages } = useChat();
+  const { allMessages, setAiResponse, setMessages, setAllMessages, callResponse } = useChat();
   const [currentStep, setCurrentStep] = useState(0);
   const [showSteps, setShowSteps] = useState(false);
   const chatContainerRef = useRef(null);
@@ -90,7 +91,7 @@ const AllChatBubble = () => {
         }
         return null;
       }),
-    [allMessages, showSteps, currentStep]
+    [allMessages, showSteps, currentStep, callResponse]
   );
 
   return (
@@ -100,6 +101,9 @@ const AllChatBubble = () => {
         className="overflow-y-auto flex-grow max-h-[75vh] flex flex-col"
       >
         {renderedMessages}
+        {callResponse && (
+          <LoadingSpinner/>
+        )}
         {/* "을 만들고 싶다면"이 포함된 메시지가 있을 때만 시작 버튼 노출 */}
         {allMessages.some(
           (msg) =>
