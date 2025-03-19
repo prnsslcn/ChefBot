@@ -4,7 +4,6 @@ from flask import Blueprint, request, jsonify
 from dotenv import load_dotenv
 from openai import OpenAI
 from api.recipe_gen import generate_prompt  # 프롬프트 생성 함수 (RAG 포함)
-from api.recipe_gen import generate_recommendation  # 추천 메뉴 생성 함수
 from api.image_gen import generate_image as generate_image_ai
 from langchain_openai import ChatOpenAI
 
@@ -51,39 +50,6 @@ def generate_recipe():
 
     return jsonify({"recipe": recipe})
 
-# 메뉴 추천 API
-@routes.route("/recommend-menu", methods=["POST"])
-def recommend_menu():
-    print("[🍲] /recommend-menu 엔드포인트 호출됨")
-    data = request.get_json()
-    user_input = data.get("user_input", "")
-    print(f"[🍲] 사용자 입력: {user_input}")
-
-    if not user_input:
-        return jsonify({"error": "user_input parameter is required."}), 400
-
-    print("[🧠] 프롬프트 생성 중...")
-    prompt = generate_recommendation(user_input)
-    print(f"[🧠] 생성된 프롬프트:\n{prompt}")
-
-    # GPT 호출 
-    response = llm.invoke([{"role": "user", "content": prompt}])
-    gpt_output = response.content.strip()
-    
-    print(f"[🤖] GPT 응답 내용:\n{gpt_output}")
-
-    try:
-        menu_list = json.loads(gpt_output)  
-        menu_names = [item.get("title", "요리 이름") for item in menu_list]
-
-    except json.JSONDecodeError:
-        print("[❌] JSON 변환 실패: GPT 응답이 올바르지 않음")
-        return jsonify({"error": "Invalid response format from GPT"}), 500
-
-    print(f"[✅] 추천 메뉴 목록: {menu_names}")
-
-    return jsonify({"menu_names": menu_names})
-
 # 통합 API
 @routes.route("/query", methods=["POST"])
 def handle_query():
@@ -107,6 +73,15 @@ def handle_query():
         print("[🍳] GPT 레시피 생성 중...")
         recipe = get_recipe_from_gpt(prompt)
         print("[✅] 레시피 생성 완료")
+
+        # 메뉴 추천인지 레시피 생성인지 확인
+        flag = recipe.get("flag", "recipe")
+
+        if flag == "menu":
+            print("[⚠] 재료 기반 추천이므로 이미지 생성을 건너뜁니다.")
+            return jsonify({
+                "recipe": recipe
+            })
 
         # ✅ 개선된 이미지 프롬프트 구성 (title + ingredients 활용)
         title = recipe.get("title", "요리")

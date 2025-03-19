@@ -344,8 +344,6 @@ example_selector = MaxMarginalRelevanceExampleSelector.from_examples(
     k=2
 )
 
-
-
 def parse_output(output_text):
     """
     'output'에서 '재료'와 '과정'을 추출하는 함수
@@ -454,27 +452,34 @@ def generate_prompt(user_input,input_category):
     # {user_input}
     # """
     prompt = f"""
-    다음 사용자 입력에 따라 요리를 추천해주세요.
-    아래 JSON 형식으로만 응답하세요. 설명은 하지 마세요:
+    다음 사용자 입력과 유사한 레시피 데이터를 참고하여 요리를 추천해주세요.
+    **1번과 2번 규칙을 반드시 구분하고 JSON 형식으로만 응답해주세요.**  
+    설명은 하지 마세요.
 
-    {{
-    "title": "요리 이름",
-    "ingredients": ["재료1", "재료2", "재료3"],
-    "steps": ["1단계 설명", "2단계 설명", "3단계 설명"]
-    }}
+    **1번: 사용자 입력이 name 필드(요리명)과 일치하거나 유사하면**  
+       - "요리이름 레시피" 형식으로 제공하세요.  
+       - **요리의 재료(ingredients) 및 조리 과정(steps)도 포함하세요.**  
+       - 이 경우 `"flag": "recipe"` 값을 응답에 포함하세요.
 
-    [유사 레시피 참고]:
+    **2번: 사용자 입력이 ingredients 필드(재료 목록)과 유사하면**  
+       - "재료에 맞는 레시피를 추천해줄게요" 형식으로 제공하세요.  
+       - **추천 레시피 3개만 반환**하고, **재료 및 요리 과정(ingredients & steps)은 제공하지 마세요.**  
+       - 이 경우 이미지 생성 프롬프트를 생성하지 마세요
+       - 이 경우 `"flag": "menu"` 값을 응답에 포함하세요.
+
+    사용자 입력: {user_input}
+
+    참고 레시피 데이터:
     {recipe_text}
 
-    [Few-shot 예시 레시피]:
-    {structured_examples}
-
-    [잘못된 질문 예시 응답]:
-    {invalid_structured_examples}
-
-    [사용자 입력]:
-    {user_input}
+    JSON 형식 예시(추천요리는 중복되지 않도록):
+    {{
+        "flag": "recipe" 또는 "menu",
+        "title": "요리이름 레시피" 또는 "재료에 맞는 레시피를 추천해줄게요",
+        "recommended_recipes": ["추천요리n"]
+    }}
     """
+
     return prompt
 
 def get_recipe_from_gpt(prompt):
