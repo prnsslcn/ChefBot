@@ -12,10 +12,12 @@ export const AiChatValidate = () => {
     isAiResponding,
     setIsAiResponding,
     messages,
-    optionCheck
+    setMessages,
+    optionCheck,
+    setShowSteps,
+    setStepMode
   } = useChat();
 
-  
   useEffect(() => {
     if (callResponse && !isAiResponding) {
       const fetchAiResponse = async () => {
@@ -66,6 +68,11 @@ export const AiChatValidate = () => {
           alert('에러');
           setCallResponse(false);
           setIsAiResponding(false);
+          setAiResponse([]);
+          setMessages([]);
+          setAllMessages(["어떤 요리를 만들고 싶으세요?"]);
+          setShowSteps(false);
+          setStepMode(false);
         }
       };
       fetchAiResponse();
