@@ -3,7 +3,7 @@ name: Deploy Flask App on EC2
 on:
   push:
     branches:
-      - develop
+      - main # 잠시 보류 
 
 jobs:
   deploy:

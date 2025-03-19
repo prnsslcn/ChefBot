@@ -56,14 +56,18 @@ def handle_query():
     print("[🔗] /query 통합 API 호출됨")
     data = request.get_json()
     user_input = data.get("user_input", "")
+    # input_category = data.get("category", "").strip() # 주석 처리 해놓았음
+    input_category = ""
+    
     print(f"[🔗] 사용자 입력: {user_input}")
+    print(f"[🔗] 카테고리: {input_category}")
 
     if not user_input:
         return jsonify({"error": "user_input parameter is required."}), 400
 
     try:
         print("[🔍] RAG 기반 프롬프트 생성 시작...")
-        prompt = generate_prompt(user_input)
+        prompt = generate_prompt(user_input, input_category)
         print(f"[📤] 생성된 프롬프트:\n{prompt}")
 
         print("[🍳] GPT 레시피 생성 중...")
