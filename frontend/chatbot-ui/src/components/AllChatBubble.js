@@ -1,8 +1,9 @@
 import React, { useMemo, useState, useEffect, useRef } from "react";
 import { useChat } from "../context/ChatContext";
+import { LoadingSpinner } from "./LoadingSpinner";
 
 const AllChatBubble = () => {
-  const { allMessages, setAiResponse, setMessages, setAllMessages } = useChat();
+  const { allMessages, setAiResponse, setMessages, setAllMessages, callResponse } = useChat();
   const [currentStep, setCurrentStep] = useState(0);
   const [showSteps, setShowSteps] = useState(false);
   const chatContainerRef = useRef(null);
@@ -58,8 +59,8 @@ const AllChatBubble = () => {
               <div
                 className={`chat-bubble text-xl ${
                   message === "어떤 요리를 만들고 싶으세요?"
-                    ? "bg-yellow-400"
-                    : "bg-sky-400"
+                    ? "bg-lime-600 text-lime-50"
+                    : "bg-stone-200 text-stone-900"
                 }`}
               >
                 {message}
@@ -73,7 +74,7 @@ const AllChatBubble = () => {
           if (message.content) {
             return (
               <div key={index} className="chat chat-start">
-                <div className="chat-bubble bg-yellow-400 text-xl">
+                <div className="chat-bubble bg-lime-600 text-lime-50 text-xl">
                   {message.type === "text" ? (
                     <div>{message.content}</div>
                   ) : (
@@ -90,16 +91,19 @@ const AllChatBubble = () => {
         }
         return null;
       }),
-    [allMessages, showSteps, currentStep]
+    [allMessages, showSteps, currentStep, callResponse]
   );
 
   return (
-    <div className="bg-white w-full h-full grow p-6 flex flex-col">
+    <div className="bg-white w-full h-full grow p-6 flex flex-col rounded-t-xl border-t border-l border-r border-stone-300">
       <div
         ref={chatContainerRef}
-        className="overflow-y-auto flex-grow max-h-[75vh] flex flex-col"
+        className="overflow-y-auto flex-grow max-h-[60vh] flex flex-col"
       >
         {renderedMessages}
+        {callResponse && (
+          <LoadingSpinner/>
+        )}
         {/* "을 만들고 싶다면"이 포함된 메시지가 있을 때만 시작 버튼 노출 */}
         {allMessages.some(
           (msg) =>
@@ -108,14 +112,14 @@ const AllChatBubble = () => {
           <div className="flex flex-col items-center my-6">
             {!showSteps ? (
               <button
-                className="btn bg-sky-400 w-1/3 text-2xl p-6"
+                className="btn bg-amber-500 text-amber-50 w-1/3 text-2xl p-6"
                 onClick={() => setShowSteps(true)}
               >
                 시작
               </button>
             ) : (
-              <div className="w-full flex flex-col items-center">
-                <ul className="steps steps-vertical w-2/3">
+              <div className="w-full flex items-center flex-col border-t border-stone-300 pt-4">
+                <ul className="steps steps-vertical">
                   {allMessages
                     .find((msg) => msg.recipe?.steps)
                     ?.recipe?.steps?.slice(0, currentStep + 1)
@@ -131,8 +135,8 @@ const AllChatBubble = () => {
                     (allMessages.find((msg) => msg.recipe?.steps)?.recipe?.steps
                       .length || 0) -
                       1
-                      ? "bg-emerald-400 text-emerald-900"
-                      : "bg-red-400 text-white"
+                      ? "bg-amber-600 text-amber-50"
+                      : "bg-red-600 text-red-50"
                   }`}
                   onClick={() => {
                     if (
