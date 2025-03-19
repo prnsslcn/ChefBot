@@ -56,8 +56,8 @@ def handle_query():
     print("[🔗] /query 통합 API 호출됨")
     data = request.get_json()
     user_input = data.get("user_input", "")
-    # input_category = data.get("category", "").strip() # 주석 처리 해놓았음
-    input_category = ""
+    input_category = data.get("category", "").strip() # 주석 처리 해놓았음
+    # input_category = ""
     
     print(f"[🔗] 사용자 입력: {user_input}")
     print(f"[🔗] 카테고리: {input_category}")
