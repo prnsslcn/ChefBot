@@ -425,32 +425,55 @@ def generate_prompt(user_input,input_category):
 
     similar_recipes = search_similar_recipe(user_input, top_n=3)
     recipe_text = "\n\n".join([f"레시피 이름: {r['name']}\n재료: {r['ingredients']}" for r in similar_recipes])
+    
+    # 카테고리 강제 지시 포함
+    # prompt = f"""
+    # 다음 사용자 입력에 따라 요리를 추천하되, 반드시 아래 **선택된 음식 카테고리**에 맞는 요리만 생성하세요.
+    # 다른 카테고리의 음식이 나오면 안 됩니다.
+
+    # [선택된 카테고리]: {input_category}
+    # [카테고리 예시 음식]: {', '.join(recommended_foods)}
+
+    # 반드시 아래 JSON 형식으로만 응답하세요 (불필요한 설명 문장 없이):
+    # {{
+    # "title": "요리 이름",
+    # "ingredients": ["재료1", "재료2", "재료3"],
+    # "steps": ["1단계 설명", "2단계 설명", "3단계 설명"]
+    # }}
+
+    # [유사한 기존 레시피 참고]:
+    # {recipe_text}
+
+    # [Few-shot 예시 레시피]:
+    # {structured_examples}
+
+    # [잘못된 질문 예시 응답 참고]:
+    # {invalid_structured_examples}
+
+    # [사용자 입력]:
+    # {user_input}
+    # """
     prompt = f"""
-    다음 사용자 입력과 유사한 레시피 데이터를 참고하여 요리를 추천해주세요.
-    아래 JSON 형식으로만 응답해주세요. 설명은 하지 마세요:
+    다음 사용자 입력에 따라 요리를 추천해주세요.
+    아래 JSON 형식으로만 응답하세요. 설명은 하지 마세요:
+
     {{
     "title": "요리 이름",
     "ingredients": ["재료1", "재료2", "재료3"],
     "steps": ["1단계 설명", "2단계 설명", "3단계 설명"]
     }}
 
-    참고 레시피 - 1:
+    [유사 레시피 참고]:
     {recipe_text}
 
-    참고 레시피 - 2:
+    [Few-shot 예시 레시피]:
     {structured_examples}
 
-    반드시 해당 카테고리의 음식을 추천해주세요:
-    {input_category}
-
-    해당 카테고리의 몇가지 음식 예시입니다.:
-    {recommended_foods}
-
-    질문이 잘못된 질문의 예시 답변 
-    invalid_example:
+    [잘못된 질문 예시 응답]:
     {invalid_structured_examples}
 
-    사용자 입력: {user_input}
+    [사용자 입력]:
+    {user_input}
     """
     return prompt
 
