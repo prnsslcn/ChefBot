@@ -151,7 +151,7 @@ def generate_recommendation(user_input):
 
         JSON 형식:
         {json.dumps([
-            {"title": user_input + "user_input이 요리 이름이 아니고 식재료이면 user_input을 반환하지 말고 당신이 생각한 추천 요리1로 반환해주세요. "},
+            {"title": user_input + "user_input에 ','가 들어가 있으면 user_input을 반환하지 말고 당신이 생각한 추천 요리1로 반환해주고 ','가 없으면 user_input을 반환해주세요."},
             {"title": "추천 요리2"},
             {"title": "추천 요리3"}
         ], ensure_ascii=False)}
