@@ -1,3 +1,11 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+[data-theme="light"] {
+  --color-primary: oklch(70% 0.3 310); /* ✅ primary 색상 변경 */
+}
+
 body {
   margin: 0;
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen",
@@ -21,6 +29,20 @@ code {
 .steps .step {
   text-align: left !important;
 }
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+
+.steps .step > .step-icon,
+.steps .step:not(:has(.step-icon)):after,
+.steps .step:not(:has(.step-icon)):before {
+  background-color: oklch(76% 0.188 70.08);
+  border: 1px solid oklch(76% 0.188 70.08);
+  color: oklch(98% 0.022 95.277);
+}
+
+.checkbox-primary {
+  border: 1px solid oklch(53% 0.157 131.589);
+  --input-color: oklch(53% 0.157 131.589);
+}
+
+.checkbox checkbox-primary span {
+  color: oklch(27% 0.072 132.109);
+}
