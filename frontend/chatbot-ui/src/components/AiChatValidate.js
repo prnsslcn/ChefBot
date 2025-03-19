@@ -11,8 +11,8 @@ export const AiChatValidate = () => {
     allMessages,
     isAiResponding,
     setIsAiResponding,
-    optionCheck,
-    messages
+    messages,
+    optionCheck
   } = useChat();
 
   
@@ -21,7 +21,7 @@ export const AiChatValidate = () => {
       const fetchAiResponse = async () => {
         try {
           setIsAiResponding(true);
-          const response = await postQuery(messages[messages.length - 1])
+          const response = await postQuery(messages[messages.length - 1], optionCheck)
           console.log("대답 : ",response)
           // ai 레시피 제안
           const newMessages = [
@@ -63,7 +63,8 @@ export const AiChatValidate = () => {
           setCallResponse(false);
           addMessagesSequentially();
         } catch (error) {
-          console.log(error);
+          alert('에러');
+          setCallResponse(false);
           setIsAiResponding(false);
         }
       };
