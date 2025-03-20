@@ -101,7 +101,6 @@ def handle_query():
         return jsonify({"error": str(e)}), 500
 
 ##################
-
 def clean_json_response(response_content):
     """
     GPT 응답에서 Markdown 코드 블록 (` ```json ... ``` `)을 제거하는 함수
@@ -109,10 +108,7 @@ def clean_json_response(response_content):
     # ✅ "```json" 및 "```" 제거
     response_content = response_content.replace("```json", "").replace("```", "").strip()
     return response_content
-
 ##################
-
-
 def convert_list_to_dict(recipe_list):
     """
     GPT 응답이 리스트([]) 형태일 경우, 첫 번째 레시피만 반환하는 딕셔너리({})로 변환
@@ -129,9 +125,7 @@ def convert_list_to_dict(recipe_list):
         return recipe_list[0]
 
     return recipe_list  # 이미 딕셔너리({})면 그대로 반환
-
 ##################
-
 # GPT 응답을 JSON으로 파싱
 def get_recipe_from_gpt(prompt):
     print("[🤖] get_recipe_from_gpt() 호출됨")
@@ -154,20 +148,3 @@ def get_recipe_from_gpt(prompt):
             "ingredients": [],
             "steps": content.split('\n')  # 응답을 줄 단위로 분리
         }
-
-    # json_start = content.find("{")
-    # json_end = content.rfind("}")
-    # try:
-    #     if json_start != -1 and json_end != -1:
-    #         json_content = content[json_start:json_end+1]
-    #         recipe = json.loads(json_content)
-    #         return recipe
-    #     else:
-    #         raise ValueError("No valid JSON found.")
-    # except Exception:
-    #     print("[⚠️] JSON 파싱 실패. fallback 처리됨.")
-    #     return {
-    #         "title": "AI Generated Recipe",
-    #         "ingredients": [],
-    #         "steps": content.split('\\n')
-    #     }

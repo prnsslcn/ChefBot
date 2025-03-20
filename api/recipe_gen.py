@@ -369,17 +369,6 @@ def analyze_user_input(user_input):
 # test = analyze_user_input('김치 볶음밥 만드는방법')
 # print('test!!!!!!!',test)
 
-##################
-
-def clean_json_response(response_content):
-    """
-    GPT 응답에서 Markdown 코드 블록 (` ```json ... ``` `)을 제거하는 함수
-    """
-    # ✅ "```json" 및 "```" 제거
-    response_content = response_content.replace("```json", "").replace("```", "").strip()
-    return response_content
-
-##################
 
 # 잘못된 질문용 데이터 변환 (Few-Shot Learning을 위해 input-output 변환)
 invalid_samples_for_selector = [
@@ -554,14 +543,20 @@ def get_recipe_from_gpt(prompt):
             "steps": content.split('\n')
         }
 
+##################
+def clean_json_response(response_content):
+    """
+    GPT 응답에서 Markdown 코드 블록 (` ```json ... ``` `)을 제거하는 함수
+    """
+    # ✅ "```json" 및 "```" 제거
+    response_content = response_content.replace("```json", "").replace("```", "").strip()
+    return response_content
+##################
+# 통합된 api에서는 사용되지않음
 # API 엔드포인트 생성
 @app.route("/generate-recipe", methods=["POST"])
 def generate_recipe():
     data = request.get_json(silent=True)
-
-    # ✅ JSON 데이터 확인 (디버깅용)
-    print("📥 Received JSON Data:", data)
-
     input_category = data.get("category", "").strip()  # 카테고리 추가
     user_input = data.get("user_input", "").strip()  # 문자열 공백 제거
     
@@ -571,14 +566,10 @@ def generate_recipe():
     # GPT 프롬프트 생성
     prompt = generate_prompt(user_input,input_category)
     print(f"\n[ 최종 프롬프트 확인]\n{prompt}")
-
     # GPT로부터 답변 생성 (Chat 모델 형식)
-    response = llm.invoke([{"role": "user", "content": prompt}])
-    print("response!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!",response)
-    
+    response = llm.invoke([{"role": "user", "content": prompt}]) 
     # ✅ Markdown 제거 후 JSON 변환
     cleaned_content = clean_json_response(response.content)
-    print("response after cleaning!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!", cleaned_content)
 
     return jsonify({"user_input": user_input, "response": cleaned_content})
 
