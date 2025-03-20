@@ -524,7 +524,28 @@ def generate_prompt(user_input,input_category):
     {user_input}
     """
     return prompt
+##################
+def final_prompt(user_select):
+    analyze=analyze_user_input(user_select)
+    recipe_text=search_similar_recipe(analyze)
+    prompt=f'''
+    
+    1. This is a reference recipe : {recipe_text}
+    2. If you don't have a reference recipe, just make one yourself.
+    3. Please absolutely make the recipe for that menu : {user_select}
+    default. Please reply in Korean 
+    Please return it unconditionally as follows:
+    {{
+    "title": "요리 이름",
+    "ingredients": ["재료1", "재료2", "재료3"],
+    "steps": ["1단계 설명", "2단계 설명", "3단계 설명"]
+    }}
+    '''
 
+    return prompt
+
+
+##################
 def get_recipe_from_gpt(prompt):
     response = llm.invoke([{"role": "user", "content": prompt}])
     content = response.content.strip()
