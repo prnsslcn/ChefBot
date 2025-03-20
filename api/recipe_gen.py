@@ -557,10 +557,14 @@ def get_recipe_from_gpt(prompt):
 # API 엔드포인트 생성
 @app.route("/generate-recipe", methods=["POST"])
 def generate_recipe():
-    data = request.get_json()
-    user_input = data.get("user_input", "").strip()  # 문자열 공백 제거
-    input_category = data.get("category", "").strip()  # 카테고리 추가
+    data = request.get_json(silent=True)
 
+    # ✅ JSON 데이터 확인 (디버깅용)
+    print("📥 Received JSON Data:", data)
+
+    input_category = data.get("category", "").strip()  # 카테고리 추가
+    user_input = data.get("user_input", "").strip()  # 문자열 공백 제거
+    
     if not user_input:
         return jsonify({"error": "user_input 파라미터가 필요합니다."}), 400
 

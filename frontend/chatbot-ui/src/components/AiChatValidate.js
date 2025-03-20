@@ -21,8 +21,20 @@ export const AiChatValidate = () => {
       const fetchAiResponse = async () => {
         try {
           setIsAiResponding(true);
-          const response = await postQuery(messages[messages.length - 1])
-          console.log("대답 : ",response)
+          // const response = await postQuery(messages[messages.length - 1]) //messages[messages.length - 1]에는 category(카테고리) 정보가 포함되지 않음
+          // // // // // // // 
+          // userInput, optionCheck 값을 직접 가져와서 API 요청
+          if (!messages || messages.length === 0) return;
+
+          const lastUserMessage = messages[messages.length - 1];
+          if (!lastUserMessage) return; //  빈 값 방지
+
+          console.log("🔍 Fetching AI response for:", lastUserMessage);
+          const response = await postQuery(lastUserMessage, optionCheck); // category 포함
+
+          console.log("대답 : ", response);
+          // // // // // // // 
+          // console.log("대답 : ",response)
           // ai 레시피 제안
           const newMessages = [
             {
