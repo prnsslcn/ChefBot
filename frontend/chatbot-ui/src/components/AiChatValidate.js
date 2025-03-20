@@ -11,16 +11,19 @@ export const AiChatValidate = () => {
     allMessages,
     isAiResponding,
     setIsAiResponding,
+    messages,
+    setMessages,
     optionCheck,
-    messages
+    setShowSteps,
+    setStepMode
   } = useChat();
 
-  
   useEffect(() => {
     if (callResponse && !isAiResponding) {
       const fetchAiResponse = async () => {
         try {
           setIsAiResponding(true);
+
           // const response = await postQuery(messages[messages.length - 1]) //messages[messages.length - 1]에는 category(카테고리) 정보가 포함되지 않음
           // // // // // // // 
           // userInput, optionCheck 값을 직접 가져와서 API 요청
@@ -35,6 +38,7 @@ export const AiChatValidate = () => {
           console.log("대답 : ", response);
           // // // // // // // 
           // console.log("대답 : ",response)
+
           // ai 레시피 제안
           const newMessages = [
             {
@@ -75,8 +79,14 @@ export const AiChatValidate = () => {
           setCallResponse(false);
           addMessagesSequentially();
         } catch (error) {
-          console.log(error);
+          alert('에러');
+          setCallResponse(false);
           setIsAiResponding(false);
+          setAiResponse([]);
+          setMessages([]);
+          setAllMessages(["어떤 요리를 만들고 싶으세요?"]);
+          setShowSteps(false);
+          setStepMode(false);
         }
       };
       fetchAiResponse();

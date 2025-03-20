@@ -1,10 +1,10 @@
 import React, { useState } from "react";
 import { useChat } from "../context/ChatContext";
-import { postQuery } from "../api/getQuery";
 
 export const UserInput = () => {
   const [userInput, setUserInput] = useState("");
-  const { isAiResponding,setMessages, setCallResponse, setAllMessages, optionCheck, setOptionCheck, setAiResponse } = useChat();
+
+  const { isAiResponding,setMessages, setCallResponse, setAllMessages, optionCheck, setOptionCheck, stepMode, setStepMode} = useChat();
 
 
   const handleInputChange = (e) => {
@@ -32,14 +32,8 @@ export const UserInput = () => {
       setMessages((prevMessages) => [...prevMessages, userInput]);
       setAllMessages((prevMessages) => [...prevMessages, userInput]);
       setCallResponse(true);
+      setStepMode(true);
       setUserInput("");
-
-      try {
-        const response = await postQuery(userInput, optionCheck);
-        console.log(response);
-      } catch (err) {
-        console.log(err);
-      }
     }
   };
 
@@ -61,6 +55,7 @@ export const UserInput = () => {
               checked={optionCheck === category}
               onChange={() => handleCheckboxChange(category)}
               className="checkbox checkbox-primary"
+              disabled={isAiResponding || stepMode}
             />
             <span>{category}</span>
           </label>
@@ -78,7 +73,7 @@ export const UserInput = () => {
         <button
           className="btn absolute right-5 top-1/2 transform -translate-y-1/2"
           onClick={handleSubmit}
-          disabled={isAiResponding}
+          disabled={isAiResponding || stepMode}
         >
           전송
           <svg
