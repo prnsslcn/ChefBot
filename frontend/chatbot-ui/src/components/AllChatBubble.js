@@ -28,7 +28,11 @@ const AllChatBubble = () => {
 
   useEffect(() => {
     if (chatContainerRef.current) {
-      chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight;
+      chatContainerRef.current.scrollTo({
+        top: chatContainerRef.current.scrollHeight,
+        behavior: 'smooth',
+      });
+      
     }
   }, [allMessages, currentStep]);
 
@@ -87,7 +91,7 @@ const AllChatBubble = () => {
   );
 
   return (
-    <div className="flex-1 overflow-y-auto p-4" ref={chatContainerRef}>
+    <div className="flex-1 overflow-y-auto p-4 scroll-smooth scrollbar-hidden" ref={chatContainerRef}>
       {renderedMessages}
       {showLoading && (
         <div className={`${!callResponse ? "animate-fadeout" : ""}`}>
@@ -111,21 +115,23 @@ const AllChatBubble = () => {
                     <li key={idx} className="p-3 bg-sky-100 rounded-lg shadow animate-fadein">{step}</li>
                   ))}
               </ul>
-              <button
-                className={`mt-4 px-6 py-3 rounded-lg text-white ${
-                  currentStep < (allMessages.find((msg) => msg.recipe?.steps)?.recipe?.steps.length || 0) - 1
-                    ? "bg-sky-500 hover:bg-sky-700"
-                    : "bg-red-500 hover:bg-red-700"
-                }`}
-                onClick={() => {
-                  const steps = allMessages.find((msg) => msg.recipe?.steps)?.recipe?.steps || [];
-                  currentStep >= steps.length - 1 ? handleReTry() : handleNextStep(steps);
-                }}
-              >
-                {currentStep < (allMessages.find((msg) => msg.recipe?.steps)?.recipe?.steps.length || 0) - 1
-                  ? "다음"
-                  : "다시 시작"}
-              </button>
+              <div className="flex justify-center">
+                <button
+                  className={`mt-4 px-6 py-3 rounded-lg text-white ${
+                    currentStep < (allMessages.find((msg) => msg.recipe?.steps)?.recipe?.steps.length || 0) - 1
+                      ? "bg-sky-500 hover:bg-sky-700"
+                      : "bg-red-500 hover:bg-red-700"
+                  }`}
+                  onClick={() => {
+                    const steps = allMessages.find((msg) => msg.recipe?.steps)?.recipe?.steps || [];
+                    currentStep >= steps.length - 1 ? handleReTry() : handleNextStep(steps);
+                  }}
+                >
+                  {currentStep < (allMessages.find((msg) => msg.recipe?.steps)?.recipe?.steps.length || 0) - 1
+                    ? "다음"
+                    : "다시 시작"}
+                </button>
+              </div>
             </div>
           )}
         </div>
