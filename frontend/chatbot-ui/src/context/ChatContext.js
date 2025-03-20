@@ -12,6 +12,7 @@ export const ChatProvider = ({ children }) => {
   const [isAiResponding, setIsAiResponding] = useState(false);
   const [optionCheck, setOptionCheck] = useState("");
   const [stepMode, setStepMode] = useState(false);
+  const [showSteps, setShowSteps] = useState(false);
 
   return (
     <ChatContext.Provider
@@ -28,7 +29,8 @@ export const ChatProvider = ({ children }) => {
         setIsAiResponding,
         optionCheck,
         setOptionCheck,
-        stepMode, setStepMode
+        stepMode, setStepMode,
+        showSteps, setShowSteps
       }}
     >
       {children}
