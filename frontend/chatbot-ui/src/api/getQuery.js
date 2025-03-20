@@ -2,11 +2,11 @@ import axios from "axios";
 import { customAxios } from "./axiosCustom";
 
 
-export const postQuery = async (user_input, input_category) => {
+export const postQuery = async (user_input,category) => {
   try {
-    console.log(user_input, input_category)
-    const response = await customAxios.post("/query", { user_input});
-
+    // console.log("🛠️ Sending request with:", { user_input,category }); // ✅ 디버깅 추가
+    const response = await customAxios.post("/query", { user_input,category });
+    
     return response.data;
   } catch (error) {
     console.log(error);

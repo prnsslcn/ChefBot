@@ -76,6 +76,7 @@ def handle_query():
 
         print("[🍳] GPT 레시피 생성 중...")
         recipe = get_recipe_from_gpt(prompt)
+        print("recipe!!!!!!!!!!!!!!!@@@@@",recipe)
         print("[✅] 레시피 생성 완료")
 
         # ✅ 개선된 이미지 프롬프트 구성 (title + ingredients 활용)
