@@ -67,7 +67,7 @@ def handle_query():
     input_category = data.get("category", "").strip() 
     user_flag = data.get("flag", "").strip() 
     
-    user_select = '두바이초콜릿'
+    user_select = user_input
     flag = user_flag
 
     # 임의로 추가함
