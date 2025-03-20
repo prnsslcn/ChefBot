@@ -190,7 +190,7 @@ def filter_top_recipes(recipe_data, top_3_recipes):
 ##################
 # GPT 응답을 JSON으로 파싱
 def get_recipe_from_gpt(prompt):
-    print("[🤖] get_recipe_from_gpt() 호출됨")
+    print("[🤖] get_recipe_from_gpt() 호출됨",prompt)
     response = llm.invoke([{"role": "user", "content": prompt}])
     content = response.content.strip()
     content=clean_json_response(content)
