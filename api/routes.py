@@ -56,8 +56,12 @@ def handle_query():
     print("[🔗] /query 통합 API 호출됨")
     data = request.get_json()
     user_input = data.get("user_input", "")
-    # input_category = data.get("category", "").strip() # 주석 처리 해놓았음
-    input_category = ""
+    input_category = data.get("category", "").strip() # 주석 처리 해놓았음
+
+    print(f"[🔗] 사용자 입력: {user_input}")
+    print(f"[🔗] 카테고리: {input_category}")  # ✅ 로그 확인용
+
+    # input_category = ""
     
     print(f"[🔗] 사용자 입력: {user_input}")
     print(f"[🔗] 카테고리: {input_category}")
@@ -95,27 +99,74 @@ def handle_query():
         print(f"[❌] 에러 발생: {str(e)}")
         return jsonify({"error": str(e)}), 500
 
+##################
+
+def clean_json_response(response_content):
+    """
+    GPT 응답에서 Markdown 코드 블록 (` ```json ... ``` `)을 제거하는 함수
+    """
+    # ✅ "```json" 및 "```" 제거
+    response_content = response_content.replace("```json", "").replace("```", "").strip()
+    return response_content
+
+##################
+
+
+def convert_list_to_dict(recipe_list):
+    """
+    GPT 응답이 리스트([]) 형태일 경우, 첫 번째 레시피만 반환하는 딕셔너리({})로 변환
+    """
+    if not recipe_list:
+        return {
+            "title": "AI Generated Recipe",
+            "ingredients": [],
+            "steps": []
+        }
+
+    if isinstance(recipe_list, list):
+        # ✅ 첫 번째 레시피만 반환
+        return recipe_list[0]
+
+    return recipe_list  # 이미 딕셔너리({})면 그대로 반환
+
+##################
 
 # GPT 응답을 JSON으로 파싱
 def get_recipe_from_gpt(prompt):
     print("[🤖] get_recipe_from_gpt() 호출됨")
     response = llm.invoke([{"role": "user", "content": prompt}])
     content = response.content.strip()
+    content=clean_json_response(content)
     print("[🤖] GPT 응답 내용:\n", content)
 
-    json_start = content.find("{")
-    json_end = content.rfind("}")
     try:
-        if json_start != -1 and json_end != -1:
-            json_content = content[json_start:json_end+1]
-            recipe = json.loads(json_content)
-            return recipe
-        else:
-            raise ValueError("No valid JSON found.")
-    except Exception:
+        # ✅ JSON 파싱 시도
+        recipe_data = json.loads(content)
+
+        # ✅ 리스트([]) → 딕셔너리({}) 변환
+        return convert_list_to_dict(recipe_data)
+
+    except json.JSONDecodeError:
         print("[⚠️] JSON 파싱 실패. fallback 처리됨.")
         return {
             "title": "AI Generated Recipe",
             "ingredients": [],
-            "steps": content.split('\\n')
+            "steps": content.split('\n')  # 응답을 줄 단위로 분리
         }
+
+    # json_start = content.find("{")
+    # json_end = content.rfind("}")
+    # try:
+    #     if json_start != -1 and json_end != -1:
+    #         json_content = content[json_start:json_end+1]
+    #         recipe = json.loads(json_content)
+    #         return recipe
+    #     else:
+    #         raise ValueError("No valid JSON found.")
+    # except Exception:
+    #     print("[⚠️] JSON 파싱 실패. fallback 처리됨.")
+    #     return {
+    #         "title": "AI Generated Recipe",
+    #         "ingredients": [],
+    #         "steps": content.split('\\n')
+    #     }

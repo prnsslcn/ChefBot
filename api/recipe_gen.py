@@ -22,7 +22,7 @@ API_KEY = os.getenv("OPENAI_API_KEY")
 client = OpenAI(api_key=API_KEY)
 
 # GPT 모델 설정
-llm = ChatOpenAI(model="gpt-4o-mini")
+llm = ChatOpenAI(model="gpt-4o")
 embedding_model = OpenAIEmbeddings()
 
 # 현재 파일 기준 상대 경로로 FAISS 인덱스 및 레시피 데이터 로드
@@ -306,9 +306,80 @@ def recommend_foods(category_input):
     # 디버깅용 출력
     print(f"🔹 추천 음식 리스트: {recommended_foods}")
 
-    return predicted_category, recommended_foods
+    return category_input, recommended_foods
 ###
+##################
+# input_category,recommended_foods=recommend_foods('양식')
 
+# 📌 GPT에게 음식 카테고리를 물어보는 함수
+def get_food_category_from_gpt(input_data,input_category,recommended_foods):
+    analyze=analyze_user_input(input_data)
+    """
+    GPT에게 입력받은 음식이 어떤 카테고리인지 질문하고 결과를 저장
+    """
+    category_prompt = f"""
+    a. Please check the food category : {input_category}
+    b. Please check the foods in this category : {recommended_foods}
+    c. Please make it to my requirements : {analyze}
+    d. Please recommend 10 foods that fit the categories related to the above requirements without fail, especially by referring to {analyze}. 
+    e. Fusion food is also okay
+    f. Please return it in list format, unconditionally adding the {input_category} in front of the food name.
+    g. Please list them even if it takes time.
+
+    default. Please reply in Korean
+    """
+
+    # print("category_prompt!!!!!!",category_prompt)
+    # print("category_prompt!!!!!!",category_prompt)
+    # print("category_prompt!!!!!!",category_prompt)
+    # print("category_prompt!!!!!!",category_prompt)
+    # print("category_prompt!!!!!!",category_prompt)
+    # print("category_prompt!!!!!!",category_prompt)
+
+    # ✅ GPT에게 질문
+    response = llm.invoke([{"role": "user", "content": category_prompt}])
+    content = response.content.strip()
+
+    return content
+# test=get_food_category_from_gpt(input_category,recommended_foods)
+# print("test!!!!!",test)
+
+##################
+
+##################
+
+# 사용자가 요구분석 함수
+def analyze_user_input(user_input):
+    """
+    사용의 요구사항 분석
+    """
+    analyze = f"""
+    1. Please analyze the meaning of the word{user_input}
+    2. Please list the meanings in sequential order.
+
+    default. Please reply in Korean
+    """
+
+    # ✅ GPT에게 질문
+    response = llm.invoke([{"role": "user", "content": analyze}])
+    content = response.content.strip()
+
+    return content
+
+# test = analyze_user_input('김치 볶음밥 만드는방법')
+# print('test!!!!!!!',test)
+
+##################
+
+def clean_json_response(response_content):
+    """
+    GPT 응답에서 Markdown 코드 블록 (` ```json ... ``` `)을 제거하는 함수
+    """
+    # ✅ "```json" 및 "```" 제거
+    response_content = response_content.replace("```json", "").replace("```", "").strip()
+    return response_content
+
+##################
 
 # 잘못된 질문용 데이터 변환 (Few-Shot Learning을 위해 input-output 변환)
 invalid_samples_for_selector = [
@@ -398,6 +469,8 @@ def generate_prompt(user_input,input_category):
     #카테고리
     predicted_category, recommended_foods = recommend_foods(input_category)
 
+    category_food=get_food_category_from_gpt(user_input,input_category,recommended_foods)
+
     selected_examples = example_selector.select_examples({"input": user_input})
     invalid_selected_examples = invalid_example_selector.select_examples({"input": user_input})
 
@@ -425,43 +498,29 @@ def generate_prompt(user_input,input_category):
 
     similar_recipes = search_similar_recipe(user_input, top_n=3)
     recipe_text = "\n\n".join([f"레시피 이름: {r['name']}\n재료: {r['ingredients']}" for r in similar_recipes])
-    
-    # 카테고리 강제 지시 포함
-    # prompt = f"""
-    # 다음 사용자 입력에 따라 요리를 추천하되, 반드시 아래 **선택된 음식 카테고리**에 맞는 요리만 생성하세요.
-    # 다른 카테고리의 음식이 나오면 안 됩니다.
-
-    # [선택된 카테고리]: {input_category}
-    # [카테고리 예시 음식]: {', '.join(recommended_foods)}
-
-    # 반드시 아래 JSON 형식으로만 응답하세요 (불필요한 설명 문장 없이):
-    # {{
-    # "title": "요리 이름",
-    # "ingredients": ["재료1", "재료2", "재료3"],
-    # "steps": ["1단계 설명", "2단계 설명", "3단계 설명"]
-    # }}
-
-    # [유사한 기존 레시피 참고]:
-    # {recipe_text}
-
-    # [Few-shot 예시 레시피]:
-    # {structured_examples}
-
-    # [잘못된 질문 예시 응답 참고]:
-    # {invalid_structured_examples}
-
-    # [사용자 입력]:
-    # {user_input}
-    # """
     prompt = f"""
-    다음 사용자 입력에 따라 요리를 추천해주세요.
-    아래 JSON 형식으로만 응답하세요. 설명은 하지 마세요:
+    1. Please recommend dishes based on the following user input
+    2. Please recommend dishes that are absolutely similar to [카테고리 음식].
+    3. Please respond only in JSON format below. No description.
+    4. When selecting the food menu, mix  [카테고리 음식] : [유사 레시피 참고] : [Few-shot 예시 레시피] in a ratio of 5:3:2.
+    5. If a user recommends a dish rather than an ingredient, be sure to add a recipe for that dish. : {user_input}
+    6. If there is no recipe for the selected food, please create one arbitrarily.
+    default. Please reply in Korean :
 
+    Please return it unconditionally as follows:
     {{
     "title": "요리 이름",
     "ingredients": ["재료1", "재료2", "재료3"],
     "steps": ["1단계 설명", "2단계 설명", "3단계 설명"]
     }}
+
+    -----
+
+    [음식 카테고리]:
+    {input_category}
+
+    [카테고리 음식]:
+    {category_food}
 
     [유사 레시피 참고]:
     {recipe_text}
@@ -498,10 +557,14 @@ def get_recipe_from_gpt(prompt):
 # API 엔드포인트 생성
 @app.route("/generate-recipe", methods=["POST"])
 def generate_recipe():
-    data = request.get_json()
-    user_input = data.get("user_input", "").strip()  # 문자열 공백 제거
-    input_category = data.get("category", "").strip()  # 카테고리 추가
+    data = request.get_json(silent=True)
 
+    # ✅ JSON 데이터 확인 (디버깅용)
+    print("📥 Received JSON Data:", data)
+
+    input_category = data.get("category", "").strip()  # 카테고리 추가
+    user_input = data.get("user_input", "").strip()  # 문자열 공백 제거
+    
     if not user_input:
         return jsonify({"error": "user_input 파라미터가 필요합니다."}), 400
 
@@ -511,8 +574,13 @@ def generate_recipe():
 
     # GPT로부터 답변 생성 (Chat 모델 형식)
     response = llm.invoke([{"role": "user", "content": prompt}])
+    print("response!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!",response)
     
-    return jsonify({"user_input": user_input, "response": response.content})
+    # ✅ Markdown 제거 후 JSON 변환
+    cleaned_content = clean_json_response(response.content)
+    print("response after cleaning!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!", cleaned_content)
+
+    return jsonify({"user_input": user_input, "response": cleaned_content})
 
 # Flask 앱 실행
 if __name__ == "__main__":
