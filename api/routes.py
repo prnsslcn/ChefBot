@@ -1,5 +1,6 @@
 import os
 import json
+import re
 from flask import Blueprint, request, jsonify
 from dotenv import load_dotenv
 from openai import OpenAI
@@ -36,13 +37,15 @@ def generate_recipe():
     print("[🍽️] /generate-recipe 엔드포인트 호출됨")
     data = request.get_json()
     user_input = data.get("user_input", "")
+    input_category = data.get("category", "").strip() if data.get("category") else "기본 카테고리"
+
     print(f"[🍽️] 사용자 입력: {user_input}")
 
     if not user_input:
         return jsonify({"error": "user_input parameter is required."}), 400
 
     print("[🧠] 프롬프트 생성 중...")
-    prompt = generate_prompt(user_input)
+    prompt = generate_prompt(user_input, input_category)  # ✅ 올바르게 수정!
     print(f"[🧠] 생성된 프롬프트:\n{prompt}")
 
     recipe = get_recipe_from_gpt(prompt)
@@ -126,6 +129,65 @@ def convert_list_to_dict(recipe_list):
 
     return recipe_list  # 이미 딕셔너리({})면 그대로 반환
 ##################
+def convert_list_to_dicts(recipe_list):
+    """
+    GPT 응답이 리스트([]) 형태일 경우, 모든 레시피를 변환하여 반환하는 함수
+    """
+    if not recipe_list:
+        return [{
+            "title": "AI Generated Recipe",
+            "ingredients": [],
+            "steps": []
+        }]
+
+    if isinstance(recipe_list, list):
+        # ✅ 모든 레시피 반환
+        return recipe_list  
+
+    return [recipe_list]  # 이미 딕셔너리({})면 리스트에 담아서 반환
+
+##################
+def extract_user_input(prompt):
+    """
+    prompt에서 [사용자 입력]: 이후의 값을 추출하는 함수
+    """
+    match = re.search(r"\[사용자 입력\]:\s*(.+)", prompt)
+    if match:
+        return match.group(1).strip()
+    return None  # 사용자 입력이 없을 경우 None 반환
+##################
+from sentence_transformers import SentenceTransformer
+import numpy as np
+# ✅ SBERT 모델 로드
+model = SentenceTransformer('all-MiniLM-L6-v2')
+
+def get_top_similar_recipes(user_input, recipe_titles, top_n=3):
+    """
+    user_input과 recipe_titles 간의 유사도를 비교하여
+    가장 유사한 top_n개의 레시피를 반환하는 함수
+    """
+    # 1️⃣ user_input과 recipe_titles를 벡터화
+    user_input_vec = model.encode([user_input])  # (1, dim)
+    recipe_vecs = model.encode(recipe_titles)  # (N, dim)
+
+    # 2️⃣ 코사인 유사도 계산
+    similarities = np.dot(recipe_vecs, user_input_vec.T).flatten()
+
+    # 3️⃣ 가장 유사한 top_n개의 인덱스 찾기
+    top_indices = np.argsort(similarities)[::-1][:top_n]
+
+    # 4️⃣ 유사한 레시피 반환
+    top_recipes = [recipe_titles[i] for i in top_indices]
+
+    return top_recipes
+##################
+def filter_top_recipes(recipe_data, top_3_recipes):
+    """
+    recipe_data 리스트에서 top_3_recipes의 title과 일치하는 레시피를 반환하는 함수
+    """
+    filtered_recipes = [recipe for recipe in recipe_data if recipe["title"] in top_3_recipes]
+    return filtered_recipes
+##################
 # GPT 응답을 JSON으로 파싱
 def get_recipe_from_gpt(prompt):
     print("[🤖] get_recipe_from_gpt() 호출됨")
@@ -134,12 +196,36 @@ def get_recipe_from_gpt(prompt):
     content=clean_json_response(content)
     print("[🤖] GPT 응답 내용:\n", content)
 
+    ####################
+    user_input=extract_user_input(prompt)
+
+    # JSON 파싱 시도
+    recipe_data = json.loads(content)
+    # title만 리스트로 저장
+    recipe_titles = [recipe["title"] for recipe in recipe_data]
+    print("[📌] 추출된 레시피 제목 리스트:", recipe_titles)
+
+    top_3_recipes = get_top_similar_recipes(user_input, recipe_titles)
+    print("🥇 가장 유사한 3가지 메뉴:", top_3_recipes)
+
+    matching_recipes = filter_top_recipes(recipe_data,top_3_recipes)
+
+    # print("matching_recipes!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!",matching_recipes)
+    test=convert_list_to_dicts(matching_recipes)
+    print('test!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!',test)
+          
+    ####################
+
     try:
         # ✅ JSON 파싱 시도
         recipe_data = json.loads(content)
+        print("[🤖] recipe_data 응답 내용:\n", recipe_data)
+
+        print("[🤖] convert_list_to_dict(recipe_data) 응답 내용:\n", convert_list_to_dict(recipe_data))
 
         # ✅ 리스트([]) → 딕셔너리({}) 변환
         return convert_list_to_dict(recipe_data)
+        
 
     except json.JSONDecodeError:
         print("[⚠️] JSON 파싱 실패. fallback 처리됨.")
