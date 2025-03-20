@@ -1,4 +1,4 @@
-import React, { useMemo, useState, useEffect, useRef } from "react";
+import { useEffect, useRef, useState, useMemo } from "react";
 import { useChat } from "../context/ChatContext";
 import { LoadingSpinner } from "./LoadingSpinner";
 
@@ -14,6 +14,23 @@ const AllChatBubble = () => {
   const [currentStep, setCurrentStep] = useState(0);
   const [showSteps, setShowSteps] = useState(false);
   const chatContainerRef = useRef(null);
+  const [showLoading, setShowLoading] = useState(false);
+
+  useEffect(() => {
+    if (callResponse) {
+      setShowLoading(true);
+    } else {
+      // 로딩 끝날 때는 0.4초 후 제거 (애니메이션 시간 맞춰서)
+      const timeout = setTimeout(() => setShowLoading(false), 400);
+      return () => clearTimeout(timeout);
+    }
+  }, [callResponse]);  
+
+  useEffect(() => {
+    if (chatContainerRef.current) {
+      chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight;
+    }
+  }, [allMessages, currentStep]);
 
   const handleReTry = () => {
     setAiResponse([]);
@@ -22,24 +39,6 @@ const AllChatBubble = () => {
     setShowSteps(false);
     setStepMode(false);
   };
-
-  useEffect(() => {
-    if (
-      allMessages.some(
-        (msg) => msg.type === "text" && msg.content.includes("을 만들고 싶다면")
-      )
-    ) {
-      setShowSteps(false);
-      setCurrentStep(0);
-    }
-  }, [allMessages]);
-
-  useEffect(() => {
-    if (chatContainerRef.current) {
-      chatContainerRef.current.scrollTop =
-        chatContainerRef.current.scrollHeight;
-    }
-  }, [allMessages, currentStep]);
 
   const handleNextStep = (steps) => {
     if (currentStep < steps.length - 1) {
@@ -53,135 +52,84 @@ const AllChatBubble = () => {
   const renderedMessages = useMemo(
     () =>
       allMessages.map((message, index) => {
-        // string 메시지 처리
         if (typeof message === "string") {
+          const isUser = message !== "어떤 요리를 만들고 싶으세요?";
           return (
             <div
               key={index}
-              className={`chat ${
-                message === "어떤 요리를 만들고 싶으세요?"
-                  ? "chat-start"
-                  : "chat-end"
-              }`}
-            >
+              className={`chat-message ${isUser ? "text-right" : "text-left"} mb-2 animate-fadein`}>
               <div
-                className={`chat-bubble text-xl ${
-                  message === "어떤 요리를 만들고 싶으세요?"
-                    ? "bg-lime-600 text-lime-50"
-                    : "bg-stone-200 text-stone-900"
-                }`}
-              >
+                className={`inline-block px-4 py-2 rounded-xl max-w-[70%] text-base ${
+                  isUser ? "bg-sky-500 text-white ml-auto" : "bg-neutral-100 text-black mr-auto"
+                } shadow`}>
                 {message}
               </div>
             </div>
           );
         }
 
-        // object 메시지 처리
-        if (typeof message === "object" && message !== null) {
-          if (message.content) {
-            return (
-              <div key={index} className="chat chat-start">
-                <div className="chat-bubble bg-lime-600 text-lime-50 text-xl">
-                  {message.type === "text" ? (
-                    <div>{message.content}</div>
-                  ) : (
-                    <img
-                      src={message.content}
-                      alt="요리 이미지"
-                      className="w-full h-64 rounded-lg"
-                    />
-                  )}
-                </div>
+        if (typeof message === "object" && message?.content) {
+          return (
+            <div key={index} className="chat-message text-left mb-2 animate-fadein">
+              
+                {message.type === "text" ? (
+                  <div className="inline-block px-4 py-2 rounded-xl bg-neutral-100 text-black max-w-[70%] shadow text-base">{message.content}</div>
+                ) : (
+                  <img src={message.content} alt="요리 이미지" className="w-full max-w-80 h-80 rounded-lg object-cover animate-fadein" />
+                )}
               </div>
-            );
-          }
+            
+          );
         }
         return null;
       }),
-    [allMessages, showSteps, currentStep, callResponse]
+    [allMessages]
   );
 
   return (
-    <div className="bg-white w-full h-full grow p-6 flex flex-col rounded-t-xl border-t border-l border-r border-stone-300">
-      <div
-        ref={chatContainerRef}
-        className="overflow-y-auto flex-grow max-h-[60vh] flex flex-col"
-      >
-        {renderedMessages}
-        {callResponse && <LoadingSpinner />}
-        {/* "을 만들고 싶다면"이 포함된 메시지가 있을 때만 시작 버튼 노출 */}
-        {allMessages.some(
-          (msg) =>
-            msg.type === "text" && msg.content.includes("을 만들고 싶다면")
-        ) && (
-          <div className="flex flex-col items-center my-6">
-            {!showSteps ? (
-              <>
-                <button
-                  className="btn bg-amber-500 text-amber-50 w-1/3 text-2xl p-6 mb-4"
-                  onClick={() => setShowSteps(true)}
-                >
-                  시작
-                </button>
+    <div className="flex-1 overflow-y-auto p-4" ref={chatContainerRef}>
+      {renderedMessages}
+      {showLoading && (
+        <div className={`${!callResponse ? "animate-fadeout" : ""}`}>
+          <LoadingSpinner />
+        </div>
+      )}
 
-                <button
-                  className="btn bg-red-600 text-red-50 w-1/3 text-xl p-4"
-                  onClick={handleReTry}
-                >
-                  다시 시작
-                </button>
-              </>
-            ) : (
-              <div className="w-full flex items-center flex-col border-t border-stone-300 pt-4">
-                <ul className="steps steps-vertical">
-                  {allMessages
-                    .find((msg) => msg.recipe?.steps)
-                    ?.recipe?.steps?.slice(0, currentStep + 1)
-                    .map((step, stepIndex) => (
-                      <li key={stepIndex} className="step step-primary text-xl">
-                        {step}
-                      </li>
-                    ))}
-                </ul>
-
-                <button
-                  className={`btn text-xl p-6 mt-4 ${
-                    currentStep <
-                    (allMessages.find((msg) => msg.recipe?.steps)?.recipe?.steps
-                      .length || 0) -
-                      1
-                      ? "bg-amber-600 text-amber-50"
-                      : "bg-red-600 text-red-50"
-                  }`}
-                  onClick={() => {
-                    if (
-                      currentStep >=
-                      (allMessages.find((msg) => msg.recipe?.steps)?.recipe
-                        ?.steps.length || 0) -
-                        1
-                    ) {
-                      handleReTry();
-                    } else {
-                      handleNextStep(
-                        allMessages.find((msg) => msg.recipe?.steps)?.recipe
-                          ?.steps || []
-                      );
-                    }
-                  }}
-                >
-                  {currentStep <
-                  (allMessages.find((msg) => msg.recipe?.steps)?.recipe?.steps
-                    .length || 0) -
-                    1
-                    ? "다음"
-                    : "다시 시작"}
-                </button>
-              </div>
-            )}
-          </div>
-        )}
-      </div>
+      {allMessages.some((msg) => msg?.type === "text" && msg.content?.includes("을 만들고 싶다면")) && (
+        <div className="flex flex-col items-center my-6 animate-fadein">
+          {!showSteps ? (
+            <button className="bg-sky-500 hover:bg-sky-700 text-white text-lg px-6 py-3 rounded-lg shadow" onClick={() => setShowSteps(true)}>
+              시작
+            </button>
+          ) : (
+            <div className="w-full mt-4">
+              <ul className="space-y-2 text-left text-base">
+                {allMessages
+                  .find((msg) => msg?.recipe?.steps)
+                  ?.recipe?.steps?.slice(0, currentStep + 1)
+                  .map((step, idx) => (
+                    <li key={idx} className="p-3 bg-sky-100 rounded-lg shadow animate-fadein">{step}</li>
+                  ))}
+              </ul>
+              <button
+                className={`mt-4 px-6 py-3 rounded-lg text-white ${
+                  currentStep < (allMessages.find((msg) => msg.recipe?.steps)?.recipe?.steps.length || 0) - 1
+                    ? "bg-sky-500 hover:bg-sky-700"
+                    : "bg-red-500 hover:bg-red-700"
+                }`}
+                onClick={() => {
+                  const steps = allMessages.find((msg) => msg.recipe?.steps)?.recipe?.steps || [];
+                  currentStep >= steps.length - 1 ? handleReTry() : handleNextStep(steps);
+                }}
+              >
+                {currentStep < (allMessages.find((msg) => msg.recipe?.steps)?.recipe?.steps.length || 0) - 1
+                  ? "다음"
+                  : "다시 시작"}
+              </button>
+            </div>
+          )}
+        </div>
+      )}
     </div>
   );
 };

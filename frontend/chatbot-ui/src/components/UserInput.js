@@ -1,98 +1,54 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { useChat } from "../context/ChatContext";
 
 export const UserInput = () => {
   const [userInput, setUserInput] = useState("");
+  const { isAiResponding, setMessages, setAllMessages, setCallResponse } = useChat();
 
-  const { isAiResponding,setMessages, setCallResponse, setAllMessages, optionCheck, setOptionCheck, stepMode, setStepMode} = useChat();
-
-
-  const handleInputChange = (e) => {
-    setUserInput(e.target.value);
-  };
-
-  const handleCheckboxChange = (selectedCategory) => {
-    setOptionCheck(selectedCategory);
-  };
-
-  const category = ["한식", "일식", "중식", "양식"];
-
-  const handleSubmit = async () => {
-    if (!optionCheck) {
-      const noCategoryMessage = {
-        type: "text",
-        content: "🚨 카테고리를 선택해주세요.",
-      };
-      setMessages((prev) => [...prev, noCategoryMessage]);
-      setAllMessages((prev) => [...prev, noCategoryMessage]);
-      return;
-    }
-
-    if (userInput.trim() !== "" && !isAiResponding) {
-      setMessages((prevMessages) => [...prevMessages, userInput]);
-      setAllMessages((prevMessages) => [...prevMessages, userInput]);
-      setCallResponse(true);
-      setStepMode(true);
-      setUserInput("");
-    }
+  const handleSubmit = () => {
+    if (!userInput.trim()) return;
+    setMessages((prev) => [...prev, userInput]);
+    setAllMessages((prev) => [...prev, userInput]);
+    setCallResponse(true);
+    setUserInput("");
   };
 
   const handleKeyUp = (e) => {
-    if (e.key === "Enter") {
-      e.preventDefault();
-      handleSubmit();
-    }
+    if (e.key === "Enter") handleSubmit();
   };
 
   return (
-    <div className="bg-white p-6 relative rounded-b-xl border-b border-l border-r border-stone-300">
-      <div className="font-semibold mb-2 text-lime-950">카테고리(필수)</div>
-      <div className="flex space-x-4 mb-4">
-        {category.map((category, idx) => (
-          <label key={idx} className="flex items-center space-x-2">
-            <input
-              type="checkbox"
-              checked={optionCheck === category}
-              onChange={() => handleCheckboxChange(category)}
-              className="checkbox checkbox-primary"
-              disabled={isAiResponding || stepMode}
-            />
-            <span>{category}</span>
-          </label>
-        ))}
-      </div>
-      <div className="relative flex items-center">
-        <input
-          type="text"
-          placeholder="만들고 싶은 요리를 입력해주세요"
-          className="input input-xl w-full pr-28 p-3 border border-gray-300 rounded-lg focus:outline-none"
-          value={userInput}
-          onChange={handleInputChange}
-          onKeyUp={handleKeyUp}
+    <div className="p-4 border-t border-gray-200 bg-white flex items-center gap-3">
+      <button
+        onClick={handleSubmit}
+        disabled={isAiResponding}
+        className="w-12 h-12 bg-emerald-500 hover:bg-emerald-700 rounded-full flex items-center justify-center text-white shadow-lg"
+      >
+        <img
+          src="https://img.icons8.com/fluency-systems-filled/96/ffffff/rice-bowl.png"
+          alt="Send"
+          className="w-6 h-6"
         />
-        <button
-          className="btn absolute right-5 top-1/2 transform -translate-y-1/2"
-          onClick={handleSubmit}
-          disabled={isAiResponding || stepMode}
-        >
-          전송
-          <svg
-            width="24"
-            height="24"
-            viewBox="0 0 48 48"
-            fill="none"
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            <path
-              d="M44 4L22 26M44 4L30 44L22 26M44 4L4 18L22 26"
-              stroke="#1E1E1E"
-              strokeWidth="4"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-          </svg>
-        </button>
-      </div>
+      </button>
+      <input
+        type="text"
+        placeholder="만들고 싶은 요리를 입력해주세요"
+        className="flex-grow border border-gray-300 rounded-full px-4 py-3 text-base focus:outline-none shadow-inner"
+        value={userInput}
+        onChange={(e) => setUserInput(e.target.value)}
+        onKeyUp={(e) => e.key === "Enter" && handleSubmit()}
+      />
+      <button
+        onClick={handleSubmit}
+        disabled={isAiResponding}
+        className="w-12 h-12 bg-sky-500 hover:bg-sky-700 rounded-full flex items-center justify-center text-white shadow-lg"
+      >
+        <img
+          src="https://img.icons8.com/ios-glyphs/90/ffffff/paper-plane.png"
+          alt="Send"
+          className="w-6 h-6"
+        />
+      </button>
     </div>
   );
 };
