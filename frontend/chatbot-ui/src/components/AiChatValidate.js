@@ -24,22 +24,16 @@ export const AiChatValidate = () => {
         try {
           setIsAiResponding(true);
 
-          // const response = await postQuery(messages[messages.length - 1]) //messages[messages.length - 1]에는 category(카테고리) 정보가 포함되지 않음
-          // // // // // // // 
-          // userInput, optionCheck 값을 직접 가져와서 API 요청
           if (!messages || messages.length === 0) return;
 
           const lastUserMessage = messages[messages.length - 1];
-          if (!lastUserMessage) return; //  빈 값 방지
+          if (!lastUserMessage) return;
 
           console.log("🔍 Fetching AI response for:", lastUserMessage);
-          const response = await postQuery(lastUserMessage, optionCheck); // category 포함
+          const response = await postQuery(lastUserMessage, optionCheck);
 
           console.log("대답 : ", response);
-          // // // // // // // 
-          // console.log("대답 : ",response)
 
-          // ai 레시피 제안
           const newMessages = [
             {
               type: "text",
@@ -52,27 +46,41 @@ export const AiChatValidate = () => {
             { type: "image", content: response.image_url },
             {
               type: "text",
-              content: `${response.recipe.title}을 만들고 싶다면 "시작" 버튼을 눌러주세요`,
+              content: `${response.recipe.title}을 만들고 싶다면 \"시작\" 버튼을 눌러주세요`,
             },
           ];
 
           const addMessagesSequentially = async () => {
             for (let i = 0; i < newMessages.length; i++) {
-              if(i === 0){
-                await new Promise((resolve) => setTimeout(resolve, 300));
+              const currentMsg = newMessages[i];
+
+              if (currentMsg.type === "image") {
+                const img = new Image();
+                img.src = currentMsg.content;
+
+                await new Promise((resolve) => {
+                  img.onload = () => {
+                    setAiResponse((prev) => [...prev, currentMsg]);
+                    setAllMessages((prev) => [...prev, currentMsg]);
+                    resolve();
+                  };
+                });
+              } else {
+                await new Promise((resolve) =>
+                  setTimeout(() => {
+                    setAiResponse((prev) => [...prev, currentMsg]);
+                    setAllMessages((prev) => [...prev, currentMsg]);
+                    resolve();
+                  }, i === 0 ? 300 : 1000)
+                );
               }
-              else if (i !== 0) {
-                await new Promise((resolve) => setTimeout(resolve, 1000));
-              }
-              setAiResponse((prev) => [...prev, newMessages[i]]);
-              setAllMessages((prev) => [...prev, newMessages[i]]);
             }
-          
+
             setAllMessages((prev) => [
               ...prev,
               { recipe: { steps: response.recipe.steps } },
             ]);
-          
+
             setIsAiResponding(false);
           };
 
@@ -94,9 +102,8 @@ export const AiChatValidate = () => {
   }, [callResponse, isAiResponding]);
 
   useEffect(() => {
-    // allMessages가 업데이트되면 로그를 찍도록 추가
     console.log("Updated allMessages:", allMessages);
-  }, [allMessages]); // allMessages가 변경될 때마다 실행됨
+  }, [allMessages]);
 
   return null;
 };
