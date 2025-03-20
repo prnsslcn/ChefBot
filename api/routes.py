@@ -68,10 +68,10 @@ def handle_query():
     user_flag = data.get("flag", "").strip() 
     
     user_select = user_input
-    flag = user_flag
+    # flag = user_flag
 
     # 임의로 추가함
-    # flag = 'detail'
+    flag = 'detail'
 
     print(f"[🔗] 사용자 입력: {user_input}")
     print(f"[🔗] 카테고리: {input_category}")  # ✅ 로그 확인용
@@ -109,6 +109,8 @@ def handle_query():
         image_response = generate_image_ai(image_prompt).get_json()
         image_url = image_response.get("image_url", "")
         print(f"[✅] 이미지 URL 생성 완료: {image_url}")
+
+        print('jsonify({ "recipe": recipe,  "image_url": image_url })' , jsonify({ "recipe": recipe,  "image_url": image_url }) )
 
         return jsonify({
             "recipe": recipe,
@@ -300,7 +302,7 @@ def convert_top_3_to_json(top_3_recipes):
 ##############################################
 # 선택지 반환 함수
 def get_select_from_gpt(prompt):
-    print("[🤖] get_recipe_from_gpt() 호출됨",prompt)
+    print("[🤖] get_select_from_gpt() 호출됨",prompt)
     response = llm.invoke([{"role": "user", "content": prompt}])
     content = response.content.strip()
     content=clean_json_response(content)
@@ -311,9 +313,21 @@ def get_select_from_gpt(prompt):
 
     # JSON 파싱 시도
     recipe_data = json.loads(content)
-    # title만 리스트로 저장
-    recipe_titles = [recipe["title"] for recipe in recipe_data]
-    print("[📌] 추출된 레시피 제목 리스트:", recipe_titles)
+    print('recipe_data!!!!!!!!!!!!!!!!!!!!',recipe_data)
+
+    # # title만 리스트로 저장
+    # recipe_titles = [recipe["title"] for recipe in recipe_data]
+    # print("[📌] 추출된 레시피 제목 리스트:", recipe_titles)
+
+    if isinstance(recipe_data, list):
+        # ✅ 리스트면 정상적으로 순회
+        recipe_titles = [recipe["title"] for recipe in recipe_data]
+    elif isinstance(recipe_data, dict):
+        # ✅ 단일 레시피(딕셔너리)라면 리스트로 변환하여 처리
+        recipe_titles = [recipe_data["title"]]
+    else:
+        raise TypeError(f"[❌] 잘못된 데이터 형식: {type(recipe_data)}")
+
 
     top_3_recipes = get_top_similar_recipes(user_input, recipe_titles)
     print("🥇 가장 유사한 3가지 메뉴:", top_3_recipes)

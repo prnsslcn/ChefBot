@@ -494,7 +494,8 @@ def generate_prompt(user_input,input_category):
     4. When selecting the food menu, mix  [카테고리 음식] : [유사 레시피 참고] : [Few-shot 예시 레시피] in a ratio of 5:3:2.
     5. If a user recommends a dish rather than an ingredient, be sure to add a recipe for that dish. : {user_input}
     6. If there is no recipe for the selected food, please create one arbitrarily.
-    default. Please reply in Korean :
+    7. Please select at least 3
+    default. Please reply in Korean 
 
     Please return it unconditionally as follows:
     {{
