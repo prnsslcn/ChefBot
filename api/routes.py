@@ -73,7 +73,7 @@ def handle_query():
     print(f"[🔗] 카테고리: {input_category}")  # ✅ 로그 확인용
 
     # 임의로 추가함
-    flag = 'select'
+    flag = 'detail'
 
     # flag == 'detail'
     if flag == 'select' :
@@ -91,6 +91,10 @@ def handle_query():
         prompt = final_prompt(user_select)
         recipe = llm.invoke([{"role": "user", "content": prompt}])
 
+        recipe = recipe.content.strip()
+        recipe = clean_json_response(recipe)
+        # print("[🤖] GPT 응답 내용:\n", recipe)
+        recipe = json.loads(recipe)  # JSON 문자열 → Python 딕셔너리 변환
         print("recipe!!!!!!!!!!!!!!!@@@@@",recipe)
         print("[✅] 레시피 생성 완료")
 
