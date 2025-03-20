@@ -3,7 +3,14 @@ import { useChat } from "../context/ChatContext";
 import { LoadingSpinner } from "./LoadingSpinner";
 
 const AllChatBubble = () => {
-  const { allMessages, setAiResponse, setMessages, setAllMessages, callResponse } = useChat();
+  const {
+    allMessages,
+    setAiResponse,
+    setMessages,
+    setAllMessages,
+    callResponse,
+    setStepMode,
+  } = useChat();
   const [currentStep, setCurrentStep] = useState(0);
   const [showSteps, setShowSteps] = useState(false);
   const chatContainerRef = useRef(null);
@@ -13,6 +20,7 @@ const AllChatBubble = () => {
     setMessages([]);
     setAllMessages(["어떤 요리를 만들고 싶으세요?"]);
     setShowSteps(false);
+    setStepMode(false);
   };
 
   useEffect(() => {
@@ -101,9 +109,7 @@ const AllChatBubble = () => {
         className="overflow-y-auto flex-grow max-h-[60vh] flex flex-col"
       >
         {renderedMessages}
-        {callResponse && (
-          <LoadingSpinner/>
-        )}
+        {callResponse && <LoadingSpinner />}
         {/* "을 만들고 싶다면"이 포함된 메시지가 있을 때만 시작 버튼 노출 */}
         {allMessages.some(
           (msg) =>
@@ -111,12 +117,21 @@ const AllChatBubble = () => {
         ) && (
           <div className="flex flex-col items-center my-6">
             {!showSteps ? (
-              <button
-                className="btn bg-amber-500 text-amber-50 w-1/3 text-2xl p-6"
-                onClick={() => setShowSteps(true)}
-              >
-                시작
-              </button>
+              <>
+                <button
+                  className="btn bg-amber-500 text-amber-50 w-1/3 text-2xl p-6 mb-4"
+                  onClick={() => setShowSteps(true)}
+                >
+                  시작
+                </button>
+
+                <button
+                  className="btn bg-red-600 text-red-50 w-1/3 text-xl p-4"
+                  onClick={handleReTry}
+                >
+                  다시 시작
+                </button>
+              </>
             ) : (
               <div className="w-full flex items-center flex-col border-t border-stone-300 pt-4">
                 <ul className="steps steps-vertical">
@@ -129,6 +144,7 @@ const AllChatBubble = () => {
                       </li>
                     ))}
                 </ul>
+
                 <button
                   className={`btn text-xl p-6 mt-4 ${
                     currentStep <
@@ -145,7 +161,7 @@ const AllChatBubble = () => {
                         ?.steps.length || 0) -
                         1
                     ) {
-                      handleReTry(); // 👉 "다시 시작"을 눌렀을 때 초기화
+                      handleReTry();
                     } else {
                       handleNextStep(
                         allMessages.find((msg) => msg.recipe?.steps)?.recipe
