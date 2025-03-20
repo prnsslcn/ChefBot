@@ -73,7 +73,7 @@ jobs:
             WorkingDirectory=/home/ubuntu/flask_app
             Environment="VIRTUAL_ENV=/home/ubuntu/flask_app/venv"
             Environment="PATH=/home/ubuntu/flask_app/venv/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
-            ExecStart=/home/ubuntu/flask_app/venv/bin/gunicorn --workers 1 --bind 0.0.0.0:8000 app:app
+            ExecStart=/home/ubuntu/flask_app/venv/bin/gunicorn --workers 1 --threads 3 --timeout 120 --bind 0.0.0.0:8000 app:app
 
             [Install]
             WantedBy=multi-user.target
