@@ -44,6 +44,15 @@ jobs:
             pip install --upgrade pip
             pip install -r requirements.txt
 
+            # Gunicorn이 설치되어 있는지 확인 후 없으면 설치
+            if ! [ -f "venv/bin/gunicorn" ]; then
+              echo "Gunicorn이 설치되지 않음. 설치 진행..."
+              pip install gunicorn
+            fi
+
+            # Gunicorn 실행 권한 부여
+            chmod +x /home/ubuntu/flask_app/venv/bin/gunicorn
+
             # .env 파일 설정 
             echo "환경 변수 설정"
             echo "OPENAI_API_KEY=${{ secrets.OPENAI_API_KEY }}" > .env
@@ -59,7 +68,8 @@ jobs:
             User=ubuntu
             Group=ubuntu
             WorkingDirectory=/home/ubuntu/flask_app
-            Environment="PATH=/home/ubuntu/flask_app/venv/bin"
+            Environment="VIRTUAL_ENV=/home/ubuntu/flask_app/venv"
+            Environment="PATH=/home/ubuntu/flask_app/venv/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
             ExecStart=/home/ubuntu/flask_app/venv/bin/gunicorn --workers 1 --bind 0.0.0.0:8000 app:app
 
             [Install]
@@ -71,6 +81,10 @@ jobs:
             sudo systemctl daemon-reload
             sudo systemctl enable flask-app
             sudo systemctl restart flask-app
+
+            # 서비스 상태 확인 및 로그 출력
             sudo systemctl status flask-app --no-pager
+            echo "최근 서비스 로그 확인"
+            sudo journalctl -u flask-app --no-pager --no-full -n 50
 
             echo "배포 완료"
