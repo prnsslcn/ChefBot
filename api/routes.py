@@ -63,19 +63,19 @@ def handle_query():
 
     print("[🔗] /query 통합 API 호출됨")
     data = request.get_json()
-    user_input = data.get("user_input", "")
-    input_category = data.get("category", "").strip() # 주석 처리 해놓았음
+    user_input = data.get("user_input", "").strip() 
+    input_category = data.get("category", "").strip() 
+    user_flag = data.get("flag", "").strip() 
     
+    user_select = '두바이초콜릿'
+    flag = user_flag
+
     # 임의로 추가함
-    user_select = '불고기'
+    # flag = 'detail'
 
     print(f"[🔗] 사용자 입력: {user_input}")
     print(f"[🔗] 카테고리: {input_category}")  # ✅ 로그 확인용
 
-    # 임의로 추가함
-    flag = 'detail'
-
-    # flag == 'detail'
     if flag == 'select' :
         print("선택지 3개를 생성 하는중...")
         prompt = generate_prompt(user_input, input_category)
@@ -87,7 +87,7 @@ def handle_query():
         return top_3_recipes
 
     elif flag == 'detail' :
-        print("선택한 메뉴를 생성하고 있습니다...")
+        print("선택한 메뉴를 생성하고 있습니다...",user_select)
         prompt = final_prompt(user_select)
         recipe = llm.invoke([{"role": "user", "content": prompt}])
 
