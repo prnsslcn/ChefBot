@@ -68,10 +68,7 @@ def handle_query():
     user_flag = data.get("flag", "").strip() 
     
     user_select = user_input
-    # flag = user_flag
-
-    # 임의로 추가함
-    flag = 'detail'
+    flag = user_flag
 
     print(f"[🔗] 사용자 입력: {user_input}")
     print(f"[🔗] 카테고리: {input_category}")  # ✅ 로그 확인용
@@ -236,7 +233,16 @@ def filter_top_recipes(recipe_data, top_3_recipes):
     """
     recipe_data 리스트에서 top_3_recipes의 title과 일치하는 레시피를 반환하는 함수
     """
-    filtered_recipes = [recipe for recipe in recipe_data if recipe["title"] in top_3_recipes]
+
+    if isinstance(recipe_data, list):
+        # ✅ 리스트인 경우 필터링 수행
+        filtered_recipes = [recipe for recipe in recipe_data if recipe["title"] in top_3_recipes]
+    elif isinstance(recipe_data, dict):
+        # ✅ 단일 레시피인 경우, 리스트에 넣어서 비교
+        filtered_recipes = [recipe_data] if recipe_data["title"] in top_3_recipes else []
+    else:
+        raise TypeError(f"[❌] 잘못된 데이터 형식: {type(recipe_data)}")
+    
     return filtered_recipes
 ##################
 # GPT 응답을 JSON으로 파싱
