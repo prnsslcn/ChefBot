@@ -6,6 +6,74 @@ const AllChatBubble = () => {
   const [currentStep, setCurrentStep] = useState(0);
   const [showSteps, setShowSteps] = useState(false);
   const chatContainerRef = useRef(null);
+<<<<<<< Updated upstream
+=======
+  const [showLoading, setShowLoading] = useState(false);
+
+  useEffect(() => {
+    if (callResponse) {
+      setShowLoading(true);
+    } else {
+      // 로딩 끝날 때는 0.4초 후 제거 (애니메이션 시간 맞춰서)
+      const timeout = setTimeout(() => setShowLoading(false), 400);
+      return () => clearTimeout(timeout);
+    }
+  }, [callResponse]);  
+
+  useEffect(() => {
+    if (chatContainerRef.current) {
+      chatContainerRef.current.scrollTo({
+        top: chatContainerRef.current.scrollHeight,
+        behavior: 'smooth',
+      });
+      
+    }
+  }, [allMessages, currentStep]);
+
+  const handleRecipeSelection = async (selectedRecipe) => {
+    if (!selectedRecipe) {
+      console.error("❌ 선택한 레시피가 없습니다.");
+      return;
+    }
+
+    setShowLoading(true);
+  
+    console.log(`✅ 선택한 요리: ${selectedRecipe}`);
+  
+    try {
+      const response = await postQuery(selectedRecipe, optionCheck, "detail");
+  
+      console.log("🔍 상세 레시피 응답: ", response);
+  
+      if (response.recipe) {
+        const newMessages = [
+          { type: "text", content: `${response.recipe.title} 어떤가요?` },
+          { type: "text", content: `📌 재료: ${response.recipe.ingredients.join(", ")}` },
+          { type: "image", content: response.image_url },
+          { type: "text", content: `${response.recipe.title}을 만들고 싶다면 "시작" 버튼을 눌러주세요` },
+          { type: "recipe", recipe: response.recipe },
+        ];
+  
+        for (let i = 0; i < newMessages.length; i++) {
+          await new Promise((resolve) =>
+            setTimeout(() => {
+              setAiResponse((prev) => [...prev, newMessages[i]]);
+              setAllMessages((prev) => [...prev, newMessages[i]]);
+              resolve();
+            }, i === 0 ? 300 : 1000)
+          );
+        }
+      }
+  
+    } catch (error) {
+      console.error("❌ 상세 레시피 요청 중 오류 발생:", error);
+    }
+    finally {
+      setTimeout(() => setShowLoading(false), 400); // 🔹 로딩 종료 애니메이션 대기
+    }
+  };
+  
+>>>>>>> Stashed changes
 
   const handleReTry = () => {
     setAiResponse([]);
