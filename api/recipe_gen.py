@@ -16,6 +16,7 @@ import numpy as np
 # Flask 앱 초기화
 app = Flask(__name__)
 
+load_dotenv()
 # OpenAI API 키
 API_KEY = os.getenv("OPENAI_API_KEY")
 client = OpenAI(api_key=API_KEY)
