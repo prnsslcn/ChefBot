@@ -17,6 +17,7 @@ import numpy as np
 app = Flask(__name__)
 
 # OpenAI API 키
+load_dotenv()
 API_KEY = os.getenv("OPENAI_API_KEY")
 client = OpenAI(api_key=API_KEY)
 
