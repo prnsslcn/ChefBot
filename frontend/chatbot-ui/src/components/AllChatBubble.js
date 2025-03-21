@@ -44,6 +44,8 @@ const AllChatBubble = () => {
       console.error("❌ 선택한 레시피가 없습니다.");
       return;
     }
+
+    setShowLoading(true);
   
     console.log(`✅ 선택한 요리: ${selectedRecipe}`);
   
@@ -61,14 +63,22 @@ const AllChatBubble = () => {
           { type: "recipe", recipe: response.recipe },
         ];
   
-        setAiResponse((prev) => [...prev, ...newMessages]);
-        setAllMessages((prev) => [...prev, ...newMessages]);
-      } else {
-        console.error("❌ 상세 레시피를 가져오지 못했습니다.");
+        for (let i = 0; i < newMessages.length; i++) {
+          await new Promise((resolve) =>
+            setTimeout(() => {
+              setAiResponse((prev) => [...prev, newMessages[i]]);
+              setAllMessages((prev) => [...prev, newMessages[i]]);
+              resolve();
+            }, i === 0 ? 300 : 1000)
+          );
+        }
       }
   
     } catch (error) {
       console.error("❌ 상세 레시피 요청 중 오류 발생:", error);
+    }
+    finally {
+      setTimeout(() => setShowLoading(false), 400); // 🔹 로딩 종료 애니메이션 대기
     }
   };
   
