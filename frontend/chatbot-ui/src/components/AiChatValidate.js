@@ -38,7 +38,7 @@ export const AiChatValidate = () => {
           const newMessages = [
             {
               type: "text",
-              content: `추천 메뉴입니다! 이런 요리는 어떤가요?`,
+              content: `입력하신 메뉴(재료) 기반 음식입니다! 선택해주세요👇 `,
             },
             {
               type: "buttons", // 새로운 타입 추가 (추천 요리 선택 버튼)
