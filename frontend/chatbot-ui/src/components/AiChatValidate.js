@@ -15,7 +15,7 @@ export const AiChatValidate = () => {
     setMessages,
     optionCheck,
     setShowSteps,
-    setStepMode
+    setStepMode,
   } = useChat();
 
   useEffect(() => {
@@ -30,23 +30,19 @@ export const AiChatValidate = () => {
           if (!lastUserMessage) return;
 
           console.log("🔍 Fetching AI response for:", lastUserMessage);
-          const response = await postQuery(lastUserMessage, optionCheck);
+          const response = await postQuery(lastUserMessage, optionCheck, "select");
 
           console.log("대답 : ", response);
 
+          // 1️⃣ 추천 요리가 여러 개일 경우, 버튼을 제공
           const newMessages = [
             {
               type: "text",
-              content: `${response.recipe.title} 어떤가요?`,
+              content: `입력하신 메뉴(재료) 기반 음식입니다! 선택해주세요👇 `,
             },
             {
-              type: "text",
-              content: `📌 재료 : ${response.recipe.ingredients}`,
-            },
-            { type: "image", content: response.image_url },
-            {
-              type: "text",
-              content: `${response.recipe.title}을 만들고 싶다면 \"시작\" 버튼을 눌러주세요`,
+              type: "buttons", // 새로운 타입 추가 (추천 요리 선택 버튼)
+              options: response.recipes, // 버튼에 표시될 요리 목록
             },
           ];
 
@@ -54,32 +50,14 @@ export const AiChatValidate = () => {
             for (let i = 0; i < newMessages.length; i++) {
               const currentMsg = newMessages[i];
 
-              if (currentMsg.type === "image") {
-                const img = new Image();
-                img.src = currentMsg.content;
-
-                await new Promise((resolve) => {
-                  img.onload = () => {
-                    setAiResponse((prev) => [...prev, currentMsg]);
-                    setAllMessages((prev) => [...prev, currentMsg]);
-                    resolve();
-                  };
-                });
-              } else {
-                await new Promise((resolve) =>
-                  setTimeout(() => {
-                    setAiResponse((prev) => [...prev, currentMsg]);
-                    setAllMessages((prev) => [...prev, currentMsg]);
-                    resolve();
-                  }, i === 0 ? 300 : 1000)
-                );
-              }
+              await new Promise((resolve) =>
+                setTimeout(() => {
+                  setAiResponse((prev) => [...prev, currentMsg]);
+                  setAllMessages((prev) => [...prev, currentMsg]);
+                  resolve();
+                }, i === 0 ? 300 : 1000)
+              );
             }
-
-            setAllMessages((prev) => [
-              ...prev,
-              { recipe: { steps: response.recipe.steps } },
-            ]);
 
             setIsAiResponding(false);
           };
@@ -87,7 +65,7 @@ export const AiChatValidate = () => {
           setCallResponse(false);
           addMessagesSequentially();
         } catch (error) {
-          alert('에러');
+          alert("에러");
           setCallResponse(false);
           setIsAiResponding(false);
           setAiResponse([]);

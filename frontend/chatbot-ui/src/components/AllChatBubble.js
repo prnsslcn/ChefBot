@@ -1,5 +1,7 @@
 import { useEffect, useRef, useState, useMemo } from "react";
 import { useChat } from "../context/ChatContext";
+import { customAxios } from "../api/axiosCustom";
+import { postQuery } from "../api/getQuery";
 import { LoadingSpinner } from "./LoadingSpinner";
 
 const AllChatBubble = () => {
@@ -10,6 +12,7 @@ const AllChatBubble = () => {
     setAllMessages,
     callResponse,
     setStepMode,
+    optionCheck,
   } = useChat();
   const [currentStep, setCurrentStep] = useState(0);
   const [showSteps, setShowSteps] = useState(false);
@@ -36,6 +39,40 @@ const AllChatBubble = () => {
     }
   }, [allMessages, currentStep]);
 
+  const handleRecipeSelection = async (selectedRecipe) => {
+    if (!selectedRecipe) {
+      console.error("❌ 선택한 레시피가 없습니다.");
+      return;
+    }
+  
+    console.log(`✅ 선택한 요리: ${selectedRecipe}`);
+  
+    try {
+      const response = await postQuery(selectedRecipe, optionCheck, "detail");
+  
+      console.log("🔍 상세 레시피 응답: ", response);
+  
+      if (response.recipe) {
+        const newMessages = [
+          { type: "text", content: `${response.recipe.title} 어떤가요?` },
+          { type: "text", content: `📌 재료: ${response.recipe.ingredients.join(", ")}` },
+          { type: "image", content: response.image_url },
+          { type: "text", content: `${response.recipe.title}을 만들고 싶다면 "시작" 버튼을 눌러주세요` },
+          { type: "recipe", recipe: response.recipe },
+        ];
+  
+        setAiResponse((prev) => [...prev, ...newMessages]);
+        setAllMessages((prev) => [...prev, ...newMessages]);
+      } else {
+        console.error("❌ 상세 레시피를 가져오지 못했습니다.");
+      }
+  
+    } catch (error) {
+      console.error("❌ 상세 레시피 요청 중 오류 발생:", error);
+    }
+  };
+  
+
   const handleReTry = () => {
     setAiResponse([]);
     setMessages([]);
@@ -52,6 +89,7 @@ const AllChatBubble = () => {
       setCurrentStep(0);
     }
   };
+
 
   const renderedMessages = useMemo(
     () =>
@@ -72,6 +110,24 @@ const AllChatBubble = () => {
           );
         }
 
+        if (typeof message === "object" && message.type === "buttons") {
+          return (
+            <div key={index} className="chat-message text-left mb-2 animate-fadein">
+              <div className="flex space-x-2">
+                {message.options.map((option, idx) => (
+                  <button
+                    key={idx}
+                    className="bg-blue-500 text-white px-4 py-2 rounded-lg shadow"
+                    onClick={() => handleRecipeSelection(option)}
+                  >
+                    {option}
+                  </button>
+                ))}
+              </div>
+            </div>
+          );
+        }
+        
         if (typeof message === "object" && message?.content) {
           return (
             <div key={index} className="chat-message text-left mb-2 animate-fadein">

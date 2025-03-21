@@ -369,17 +369,6 @@ def analyze_user_input(user_input):
 # test = analyze_user_input('김치 볶음밥 만드는방법')
 # print('test!!!!!!!',test)
 
-##################
-
-def clean_json_response(response_content):
-    """
-    GPT 응답에서 Markdown 코드 블록 (` ```json ... ``` `)을 제거하는 함수
-    """
-    # ✅ "```json" 및 "```" 제거
-    response_content = response_content.replace("```json", "").replace("```", "").strip()
-    return response_content
-
-##################
 
 # 잘못된 질문용 데이터 변환 (Few-Shot Learning을 위해 input-output 변환)
 invalid_samples_for_selector = [
@@ -503,9 +492,11 @@ def generate_prompt(user_input,input_category):
     2. Please recommend dishes that are absolutely similar to [카테고리 음식].
     3. Please respond only in JSON format below. No description.
     4. When selecting the food menu, mix  [카테고리 음식] : [유사 레시피 참고] : [Few-shot 예시 레시피] in a ratio of 5:3:2.
-    5. If a user recommends a dish rather than an ingredient, be sure to add a recipe for that dish. : {user_input}
+    5. Please include this menu without fail : {user_input}
     6. If there is no recipe for the selected food, please create one arbitrarily.
-    default. Please reply in Korean :
+    7. Please select at least 3
+    8. Please recommend only food menus
+    default. Please reply in Korean 
 
     Please return it unconditionally as follows:
     {{
@@ -535,7 +526,28 @@ def generate_prompt(user_input,input_category):
     {user_input}
     """
     return prompt
+##################
+def final_prompt(user_select):
+    analyze=analyze_user_input(user_select)
+    recipe_text=search_similar_recipe(analyze)
+    prompt=f'''
+    
+    1. This is a reference recipe : {recipe_text}
+    2. If you don't have a reference recipe, just make one yourself.
+    3. Please absolutely make the recipe for that menu : {user_select}
+    default. Please reply in Korean 
+    Please return it unconditionally as follows:
+    {{
+    "title": "요리 이름",
+    "ingredients": ["재료1", "재료2", "재료3"],
+    "steps": ["1단계 설명", "2단계 설명", "3단계 설명"]
+    }}
+    '''
 
+    return prompt
+
+
+##################
 def get_recipe_from_gpt(prompt):
     response = llm.invoke([{"role": "user", "content": prompt}])
     content = response.content.strip()
@@ -554,14 +566,20 @@ def get_recipe_from_gpt(prompt):
             "steps": content.split('\n')
         }
 
+##################
+def clean_json_response(response_content):
+    """
+    GPT 응답에서 Markdown 코드 블록 (` ```json ... ``` `)을 제거하는 함수
+    """
+    # ✅ "```json" 및 "```" 제거
+    response_content = response_content.replace("```json", "").replace("```", "").strip()
+    return response_content
+##################
+# 통합된 api에서는 사용되지않음
 # API 엔드포인트 생성
 @app.route("/generate-recipe", methods=["POST"])
 def generate_recipe():
     data = request.get_json(silent=True)
-
-    # ✅ JSON 데이터 확인 (디버깅용)
-    print("📥 Received JSON Data:", data)
-
     input_category = data.get("category", "").strip()  # 카테고리 추가
     user_input = data.get("user_input", "").strip()  # 문자열 공백 제거
     
@@ -571,14 +589,10 @@ def generate_recipe():
     # GPT 프롬프트 생성
     prompt = generate_prompt(user_input,input_category)
     print(f"\n[ 최종 프롬프트 확인]\n{prompt}")
-
     # GPT로부터 답변 생성 (Chat 모델 형식)
-    response = llm.invoke([{"role": "user", "content": prompt}])
-    print("response!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!",response)
-    
+    response = llm.invoke([{"role": "user", "content": prompt}]) 
     # ✅ Markdown 제거 후 JSON 변환
     cleaned_content = clean_json_response(response.content)
-    print("response after cleaning!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!", cleaned_content)
 
     return jsonify({"user_input": user_input, "response": cleaned_content})
 
