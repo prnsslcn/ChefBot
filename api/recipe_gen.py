@@ -17,7 +17,6 @@ import numpy as np
 app = Flask(__name__)
 
 # OpenAI API 키
-load_dotenv()
 API_KEY = os.getenv("OPENAI_API_KEY")
 client = OpenAI(api_key=API_KEY)
 
@@ -33,9 +32,7 @@ json_dir = os.path.join(BASE_DIR, "../data/recipes/")
 # FAISS 인덱스 불러오기
 if not os.path.exists(index_path):
     raise FileNotFoundError(f"FAISS 인덱스 파일을 찾을 수 없습니다: {index_path}")
-
 faiss_index = faiss.read_index(index_path)
-#print(f" FAISS 인덱스 로드 완료! 저장된 벡터 개수: {faiss_index.ntotal}")
 
 # 저장된 JSON 파일에서 레시피 데이터 로드
 all_recipes = []
@@ -45,8 +42,6 @@ for filename in os.listdir(json_dir):
         with open(file_path, "r", encoding="utf-8") as f:
             recipes = json.load(f)
             all_recipes.extend(recipes)
-
-#print(f" 저장된 레시피 데이터 로드 완료! 총 {len(all_recipes)}개 레시피")
 
 # 잘못된 질문에대한 답변
 invalid_samples = [
@@ -212,7 +207,7 @@ invalid_samples = [
     }
 ]
 
-# Few-Shot Learning 예제 (임의로 데이터 생성)
+# Few-Shot Learning 예제 (임의로 데이터 생성이 필요한 경우)
 samples = [
      {
         "title": "두바이 초콜릿",
@@ -265,18 +260,16 @@ samples = [
     }
 ]
 
-### 카테고리
+### 카테고리 분류 모델
 # SBERT 모델 로드
 model = SentenceTransformer('all-MiniLM-L6-v2')
-
-# 카테고리별 음식 매핑
+# 카테고리별 음식 매핑 (임의 작성)
 category_foods = {
     "한식": ["김치찌개", "비빔밥", "불고기", "된장찌개", "잡채"],
     "중식": ["짜장면", "짬뽕", "마파두부", "꿔바로우", "양장피"],
     "양식": ["파스타", "스테이크", "피자", "크림스프", "햄버거"],
     "일식": ["스시", "라멘", "돈카츠", "타코야끼", "오코노미야끼"]
 }
-
 # 카테고리 리스트
 X_train = list(category_foods.keys())
 # 카테고리 문장 임베딩 생성
@@ -285,33 +278,17 @@ X_train_vec = model.encode(X_train)
 knn = NearestNeighbors(n_neighbors=1, metric="cosine")
 knn.fit(X_train_vec)
 
+# 입력된 카테고리에 해당하는 음식 5개 추천 함수
 def recommend_foods(category_input):
-    """
-    입력된 카테고리에 해당하는 음식 5개 추천
-    """
     #  category_input이 비어 있거나 None이면 빈 값 반환
     if not category_input or category_input.strip() == "":
         return None, []
-    
-    category_vec = model.encode([category_input])  # 입력값 임베딩
-    _, indices = knn.kneighbors(category_vec)  # 가장 가까운 카테고리 찾기
-    predicted_category = X_train[indices[0][0]]  # 예측된 카테고리
-
-    # 디버깅용 출력
-    print(f"🔹 입력값: {category_input}")
-    print(f"🔹 예측된 카테고리: {predicted_category}")
-
-    recommended_foods = category_foods.get(predicted_category, [])
-
-    # 디버깅용 출력
-    print(f"🔹 추천 음식 리스트: {recommended_foods}")
+    recommended_foods = category_foods.get(category_input, [])
 
     return category_input, recommended_foods
 ###
-##################
-# input_category,recommended_foods=recommend_foods('양식')
 
-# 📌 GPT에게 음식 카테고리를 물어보는 함수
+# 📌 GPT에게 카테고리에맞는 음식을 10 개정도로 늘리는 함수
 def get_food_category_from_gpt(input_data,input_category,recommended_foods):
     analyze=analyze_user_input(input_data)
     """
@@ -328,25 +305,11 @@ def get_food_category_from_gpt(input_data,input_category,recommended_foods):
 
     default. Please reply in Korean
     """
-
-    # print("category_prompt!!!!!!",category_prompt)
-    # print("category_prompt!!!!!!",category_prompt)
-    # print("category_prompt!!!!!!",category_prompt)
-    # print("category_prompt!!!!!!",category_prompt)
-    # print("category_prompt!!!!!!",category_prompt)
-    # print("category_prompt!!!!!!",category_prompt)
-
     # ✅ GPT에게 질문
     response = llm.invoke([{"role": "user", "content": category_prompt}])
     content = response.content.strip()
 
     return content
-# test=get_food_category_from_gpt(input_category,recommended_foods)
-# print("test!!!!!",test)
-
-##################
-
-##################
 
 # 사용자가 요구분석 함수
 def analyze_user_input(user_input):
@@ -359,18 +322,14 @@ def analyze_user_input(user_input):
 
     default. Please reply in Korean
     """
-
-    # ✅ GPT에게 질문
+    # GPT에게 질문
     response = llm.invoke([{"role": "user", "content": analyze}])
     content = response.content.strip()
 
     return content
 
-# test = analyze_user_input('김치 볶음밥 만드는방법')
-# print('test!!!!!!!',test)
-
-
-# 잘못된 질문용 데이터 변환 (Few-Shot Learning을 위해 input-output 변환)
+## few-shot
+# 잘못된 질문 샘플 , 데이터 변환
 invalid_samples_for_selector = [
     {
         "input": sample["title"],
@@ -378,7 +337,7 @@ invalid_samples_for_selector = [
     }
     for sample in invalid_samples
 ]
-# MMR 기반 예제 선택기 (일반 요리 질문용)
+# 임의로 추가한 음식 샘플 , 데이터 변환
 samples_for_selector = [
     {
         "input": recipe["title"],  # 레시피 제목을 input으로 사용
@@ -386,10 +345,10 @@ samples_for_selector = [
     }
     for recipe in samples
 ]
+##
 
-
-
-# MMR 기반 예제 선택기 (잘못된 질문용)
+## MMR
+# 예제 선택기 (잘못된 질문용)
 invalid_example_selector = MaxMarginalRelevanceExampleSelector.from_examples(
     examples=invalid_samples_for_selector,
     embeddings=embedding_model,
@@ -404,25 +363,15 @@ example_selector = MaxMarginalRelevanceExampleSelector.from_examples(
     k=2
 )
 
-
-
-def parse_output(output_text):
-    """
-    'output'에서 '재료'와 '과정'을 추출하는 함수
-    (빈 값이 있을 경우 원래 텍스트 유지)
-    """
-    print("Parsing:", output_text)  # 🔍 디버깅용 출력 추가
-
+# 'output'에서 '재료'와 '과정'을 추출하는 함수 (빈 값이 있을 경우 원래 텍스트 유지)
+def parse_output(output_text):  
     #  '재료:' 뒤의 내용과 '과정:' 뒤의 내용을 분리
     match = re.search(r"재료:\s*(.*?)\s*과정:\s*(.*)", output_text, re.DOTALL)
-    
     if match:
         ingredients_text = match.group(1).strip()  # 재료 리스트 추출
         steps_text = match.group(2).strip()  # 조리 과정 추출
-
         #  기준으로 재료 분리 (비어있을 경우 기존 텍스트 유지)
         ingredients = [i.strip() for i in ingredients_text.split(",")] if ingredients_text else [output_text]
-
         #  같은 번호를 유지하면서 과정 분리 (비어있을 경우 기존 텍스트 유지)
         step_list = re.findall(r"(\d+\.\s*.+)", steps_text)  # 숫자+점+공백 다음의 텍스트 추출
         steps = step_list if step_list else [output_text]
@@ -432,7 +381,6 @@ def parse_output(output_text):
 
     return ingredients, steps
 
-
 # 사용자 입력을 벡터화하는 함수
 def get_embedding(user_input):
     response = client.embeddings.create(
@@ -441,29 +389,26 @@ def get_embedding(user_input):
     )
     return np.array(response.data[0].embedding).reshape(1, -1)  # FAISS 검색을 위해 2D 배열 변환
 
-# 유사 레시피 검색 함수
+# !! 유사 레시피 검색 함수 !! (RAG)
 def search_similar_recipe(user_input, top_n=3):
     user_embedding = get_embedding(user_input)
     distances, indices = faiss_index.search(user_embedding, top_n)
-
     similar_recipes = []
     for i in range(top_n):
         recipe_idx = indices[0][i]
         if recipe_idx < len(all_recipes):  # 인덱스 범위 확인
             similar_recipes.append(all_recipes[recipe_idx])
-    
     return similar_recipes
 
+# !! 프롬프트 엔지니어링 함수 !! 
 def generate_prompt(user_input,input_category):
     #카테고리
     predicted_category, recommended_foods = recommend_foods(input_category)
-
     category_food=get_food_category_from_gpt(user_input,input_category,recommended_foods)
-
+    # MMR 적용
     selected_examples = example_selector.select_examples({"input": user_input})
     invalid_selected_examples = invalid_example_selector.select_examples({"input": user_input})
-
-    #  '출력'에서 '재료'와 '과정'을 추출
+    #  '출력'에서 '재료'와 '과정'을 추출 (임의로 재료를 추가한 샘플)
     structured_examples = []
     for ex in selected_examples:
         ingredients, steps = parse_output(ex['output'])  #  수정된 함수 적용
@@ -472,9 +417,7 @@ def generate_prompt(user_input,input_category):
             "ingredients": ingredients,
             "steps": steps
         })
-    print("structured_examples!!!!!",structured_examples)
-
-     #  '출력'에서 '재료'와 '과정'을 추출
+     #  '출력'에서 '재료'와 '과정'을 추출 (유저가 입력값을 잘못 주었을때상황을 고려한 샘플)
     invalid_structured_examples = []
     for ex in invalid_selected_examples:
         ingredients, steps = parse_output(ex['output'])  #  수정된 함수 적용
@@ -483,8 +426,6 @@ def generate_prompt(user_input,input_category):
             "ingredients": ingredients,
             "steps": steps
         })
-    print("invalid_structured_examples!!!!!",invalid_structured_examples)
-
     similar_recipes = search_similar_recipe(user_input, top_n=3)
     recipe_text = "\n\n".join([f"레시피 이름: {r['name']}\n재료: {r['ingredients']}" for r in similar_recipes])
     prompt = f"""
@@ -526,7 +467,8 @@ def generate_prompt(user_input,input_category):
     {user_input}
     """
     return prompt
-##################
+
+# 사용자가 최종 선택했을때 사용할 프롬프트 
 def final_prompt(user_select):
     analyze=analyze_user_input(user_select)
     recipe_text=search_similar_recipe(analyze)
@@ -546,56 +488,34 @@ def final_prompt(user_select):
 
     return prompt
 
-
-##################
-def get_recipe_from_gpt(prompt):
-    response = llm.invoke([{"role": "user", "content": prompt}])
-    content = response.content.strip()
-    json_start = content.find('{')
-    json_end = content.rfind('}')
-    try:
-        if json_start != -1 and json_end != -1:
-            json_str = content[json_start:json_end+1]
-            return json.loads(json_str)
-        else:
-            raise ValueError("No valid JSON structure")
-    except Exception:
-        return {
-            "title": "AI Generated Recipe",
-            "ingredients": [],
-            "steps": content.split('\n')
-        }
-
-##################
-def clean_json_response(response_content):
-    """
-    GPT 응답에서 Markdown 코드 블록 (` ```json ... ``` `)을 제거하는 함수
-    """
-    # ✅ "```json" 및 "```" 제거
-    response_content = response_content.replace("```json", "").replace("```", "").strip()
-    return response_content
-##################
-# 통합된 api에서는 사용되지않음
-# API 엔드포인트 생성
-@app.route("/generate-recipe", methods=["POST"])
-def generate_recipe():
-    data = request.get_json(silent=True)
-    input_category = data.get("category", "").strip()  # 카테고리 추가
-    user_input = data.get("user_input", "").strip()  # 문자열 공백 제거
+## 통합된후 사용되지 않고있음
+# def clean_json_response(response_content):
+#     """
+#     GPT 응답에서 Markdown 코드 블록 (` ```json ... ``` `)을 제거하는 함수
+#     """
+#     # ✅ "```json" 및 "```" 제거
+#     response_content = response_content.replace("```json", "").replace("```", "").strip()
+#     return response_content
+# # API 엔드포인트 생성
+# @app.route("/generate-recipe", methods=["POST"])
+# def generate_recipe():
+#     data = request.get_json(silent=True)
+#     input_category = data.get("category", "").strip()  # 카테고리 추가
+#     user_input = data.get("user_input", "").strip()  # 문자열 공백 제거
     
-    if not user_input:
-        return jsonify({"error": "user_input 파라미터가 필요합니다."}), 400
+#     if not user_input:
+#         return jsonify({"error": "user_input 파라미터가 필요합니다."}), 400
 
-    # GPT 프롬프트 생성
-    prompt = generate_prompt(user_input,input_category)
-    print(f"\n[ 최종 프롬프트 확인]\n{prompt}")
-    # GPT로부터 답변 생성 (Chat 모델 형식)
-    response = llm.invoke([{"role": "user", "content": prompt}]) 
-    # ✅ Markdown 제거 후 JSON 변환
-    cleaned_content = clean_json_response(response.content)
+#     # GPT 프롬프트 생성
+#     prompt = generate_prompt(user_input,input_category)
+#     print(f"\n[ 최종 프롬프트 확인]\n{prompt}")
+#     # GPT로부터 답변 생성 (Chat 모델 형식)
+#     response = llm.invoke([{"role": "user", "content": prompt}]) 
+#     # ✅ Markdown 제거 후 JSON 변환
+#     cleaned_content = clean_json_response(response.content)
 
-    return jsonify({"user_input": user_input, "response": cleaned_content})
+#     return jsonify({"user_input": user_input, "response": cleaned_content})
 
-# Flask 앱 실행
-if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=5001, debug=True)
+# # Flask 앱 실행
+# if __name__ == "__main__":
+#     app.run(host="0.0.0.0", port=5001, debug=True)
