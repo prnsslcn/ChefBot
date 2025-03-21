@@ -13,6 +13,7 @@ export const ChatProvider = ({ children }) => {
   const [optionCheck, setOptionCheck] = useState("");
   const [stepMode, setStepMode] = useState(false);
   const [showSteps, setShowSteps] = useState(false);
+  const [isSelected, setIsSelected] = useState(false);
 
   return (
     <ChatContext.Provider
@@ -30,7 +31,8 @@ export const ChatProvider = ({ children }) => {
         optionCheck,
         setOptionCheck,
         stepMode, setStepMode,
-        showSteps, setShowSteps
+        showSteps, setShowSteps,
+        isSelected, setIsSelected
       }}
     >
       {children}
