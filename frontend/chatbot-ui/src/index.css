@@ -1,0 +1,57 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+[data-theme="light"] {
+  --color-primary: oklch(70% 0.3 310); /* ✅ primary 색상 변경 */
+}
+
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen",
+    "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue",
+    sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  -ms-overflow-style: none;
+  overflow: hidden;
+}
+
+::-webkit-scrollbar {
+  display: none;
+}
+
+.scrollbar-hidden {
+  -ms-overflow-style: none; /* IE, Edge */
+  scrollbar-width: none;    /* Firefox */
+}
+
+.scrollbar-hidden::-webkit-scrollbar {
+  display: none; /* Chrome, Safari, Opera */
+}
+
+code {
+  font-family: source-code-pro, Menlo, Monaco, Consolas, "Courier New",
+    monospace;
+}
+
+.steps .step {
+  text-align: left !important;
+}
+
+.steps .step > .step-icon,
+.steps .step:not(:has(.step-icon)):after,
+.steps .step:not(:has(.step-icon)):before {
+  background-color: oklch(76% 0.188 70.08);
+  border: 1px solid oklch(76% 0.188 70.08);
+  color: oklch(98% 0.022 95.277);
+}
+
+.checkbox-primary {
+  border: 1px solid oklch(53% 0.157 131.589);
+  --input-color: oklch(53% 0.157 131.589);
+}
+
+.checkbox checkbox-primary span {
+  color: oklch(27% 0.072 132.109);
+}
