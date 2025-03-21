@@ -495,6 +495,7 @@ def generate_prompt(user_input,input_category):
     5. Please include this menu without fail : {user_input}
     6. If there is no recipe for the selected food, please create one arbitrarily.
     7. Please select at least 3
+    8. Please recommend only food menus
     default. Please reply in Korean 
 
     Please return it unconditionally as follows:
